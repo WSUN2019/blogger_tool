@@ -43,7 +43,8 @@ SAMPLE_FILE = os.path.join(BASE, 'sample.txt')
 
 GEMINI_MODELS = [
     {'id': 'gemini-2.5-flash',              'label': 'Gemini 2.5 Flash'},
-    {'id': 'gemini-3.0-flash',              'label': 'Gemini 3 Flash'},
+    {'id': 'gemini-2.5-flash-lite-preview', 'label': 'Gemini 2.5 Flash Lite'},
+    {'id': 'gemini-3-flash-preview',        'label': 'Gemini 3 Flash'},
     {'id': 'gemini-3.1-flash-lite-preview', 'label': 'Gemini 3.1 Flash Lite'},
 ]
 DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash'

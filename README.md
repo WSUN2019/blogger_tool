@@ -105,14 +105,74 @@ Available models (all free tier):
 | Model | Notes |
 |-------|-------|
 | Gemini 2.5 Flash | Default — best quality |
-| Gemini 2.5 Flash Lite (preview) | Faster, lower quota usage |
-| Gemini 2.0 Flash | Stable fallback |
-| Gemini 2.0 Flash Lite | Lightest 2.0 option |
-| Gemini 1.5 Flash | Older but reliable |
-| Gemini 1.5 Flash 8B | Smallest, highest free quota |
-| Gemini 3.1 Flash Lite (preview) | Latest preview |
+| Gemini 2.5 Flash Lite | Faster, lower quota usage |
+| Gemini 3 Flash | Latest generation (preview) |
+| Gemini 3.1 Flash Lite | Latest preview, high quota |
 
 > If you see a **429 RESOURCE_EXHAUSTED** error, switch to a different model via the ⚙ panel — each model has its own independent daily quota.
+
+---
+
+## Login Credentials
+
+The app requires a username and password to access. Credentials can be set three ways (checked in this order):
+
+### Option A — Environment variables (recommended for deployment)
+
+Set `APP_USERNAME` and `APP_PASSWORD` before starting the app.
+
+**Linux / Mac (terminal):**
+```bash
+export APP_USERNAME=yourusername
+export APP_PASSWORD=yourpassword
+python3 app.py
+```
+
+**Windows (Command Prompt):**
+```cmd
+set APP_USERNAME=yourusername
+set APP_PASSWORD=yourpassword
+python app.py
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:APP_USERNAME="yourusername"
+$env:APP_PASSWORD="yourpassword"
+python app.py
+```
+
+> The `export` command shown above is Linux/Mac shell syntax. On Windows use `set` (CMD) or `$env:VAR=` (PowerShell) instead.
+
+#### Railway.app deployment
+
+In Railway, set environment variables via the project dashboard — no shell commands needed:
+
+1. Open your Railway project → select your service
+2. Go to **Variables** tab
+3. Add:
+   - `APP_USERNAME` → your chosen username
+   - `APP_PASSWORD` → your chosen password
+   - `GEMINI_API_KEY` → your Gemini API key (optional, can also be set in-app)
+   - `GEMINI_MODEL` → e.g. `gemini-2.5-flash` (optional, defaults to 2.5 Flash)
+4. Railway automatically restarts the service after saving variables
+
+---
+
+### Option B — Config file (local use)
+
+Create `config/auth.txt` with your credentials (this file is gitignored):
+
+```
+yourusername
+yourpassword
+```
+
+Line 1 = username, Line 2 = password.
+
+### Option C — Hardcoded fallback
+
+If neither env vars nor `config/auth.txt` are present, the app falls back to built-in default credentials. Change these in `app.py` if needed.
 
 ---
 
