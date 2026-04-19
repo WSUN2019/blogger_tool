@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blogger Tools — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  background: #faf8f4;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Subtle warm background pattern */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(26,38,64,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,38,64,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* Soft colour blobs */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.12;
+  animation: float 10s ease-in-out infinite;
+  pointer-events: none;
+}
+.orb-1 { width: 500px; height: 500px; background: #c9a84c; top: -160px; left: -120px; animation-delay: 0s; }
+.orb-2 { width: 380px; height: 380px; background: #1a2640; bottom: -100px; right: -80px; animation-delay: 4s; }
+.orb-3 { width: 280px; height: 280px; background: #c9a84c; bottom: 20%; left: 60%; animation-delay: 7s; }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-20px); }
+}
+
+/* Card */
+.card {
+  position: relative;
+  z-index: 10;
+  width: 420px;
+  background: #fff;
+  border: 1px solid #d9cfc0;
+  border-radius: 12px;
+  padding: 44px 42px;
+  box-shadow: 0 8px 40px rgba(26,38,64,0.1);
+}
+
+/* Logo */
+.logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+.logo-icon {
+  width: 40px; height: 40px;
+  background: #1a2640;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a2640;
+  line-height: 1.1;
+}
+.logo-text span { color: #c9a84c; }
+.logo-sub {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* Heading */
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: #1a2640;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+.subtitle {
+  font-size: 0.84rem;
+  color: #6b7280;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+/* Form */
+.field { margin-bottom: 16px; }
+label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 7px;
+}
+input[type=text], input[type=password] {
+  width: 100%;
+  background: #faf8f4;
+  border: 1px solid #d9cfc0;
+  border-radius: 6px;
+  padding: 11px 14px;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.92rem;
+  color: #3a3a3a;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input::placeholder { color: #b0a898; }
+input:focus {
+  border-color: #c9a84c;
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+  background: #fff;
+}
+
+/* Error */
+.error {
+  background: #fff5f5;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  padding: 10px 13px;
+  font-size: 0.83rem;
+  color: #c53030;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Submit */
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  background: #1a2640;
+  color: #fff;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.btn-submit:hover {
+  background: #243554;
+  box-shadow: 0 4px 16px rgba(26,38,64,0.25);
+}
+.btn-submit:active { background: #1a2640; }
+
+/* Footer note */
+.card-footer {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #ede8df;
+  font-size: 0.73rem;
+  color: #b0a898;
+  text-align: center;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="card">
+  <div class="logo-wrap">
+    <div class="logo-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M2 4h12M2 8h8M2 12h10" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="18" cy="16" r="4" stroke="#c9a84c" stroke-width="2"/>
+        <path d="M21 19l2 2" stroke="#c9a84c" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">Blogger<span> Tools</span></div>
+      <div class="logo-sub">Blog Management Tools</div>
+    </div>
+  </div>
+
+  <h1>Welcome back</h1>
+  <p class="subtitle">Sign in to access your blog management tools.</p>
+
+  {% if error %}
+  <div class="error">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <form method="POST" action="/login" autocomplete="on">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" name="username" placeholder="Enter your username" autofocus autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" name="password" placeholder="Enter your password" autocomplete="current-password">
+    </div>
+    <button type="submit" class="btn-submit">Sign In →</button>
+  </form>
+
+  <div class="card-footer">
+    Private access only · Runs locally on your machine<br>
+    Built with VS Code &amp; Claude Code
+  </div>
+</div>
+
+</body>
+</html>

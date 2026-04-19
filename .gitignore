@@ -1,0 +1,19 @@
+# Credentials & API keys
+config/credentials.json
+config/token.json
+config/gemini_key.txt
+config/gemini_model.txt
+config/auth.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+
+# Flask session
+instance/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blogger Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #1a2640;
+  --accent: #c9a84c;
+  --accent-light: #e8d5a3;
+  --bg: #faf8f4;
+  --warm: #f2ede4;
+  --border: #d9cfc0;
+  --muted: #6b7280;
+  --body-text: #3a3a3a;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  background: var(--bg);
+  color: var(--body-text);
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.app-header {
+  background: var(--primary);
+  padding: 0 28px;
+  display: flex;
+  align-items: stretch;
+  height: 58px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.app-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 36px;
+  flex-shrink: 0;
+}
+.logo-icon {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+}
+.app-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: white;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.app-logo-text span { color: var(--accent); }
+
+.tab-nav { display: flex; align-items: stretch; }
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: rgba(255,255,255,0.55);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0 18px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  position: relative;
+  top: 3px;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.85); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Layout ── */
+.main { max-width: 1360px; margin: 0 auto; padding: 28px 20px 60px; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── Typography ── */
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.55rem;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+.page-desc { color: var(--muted); font-size: 0.88rem; margin-bottom: 22px; line-height: 1.5; }
+
+/* ── Cards ── */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 22px;
+}
+
+/* ── Form elements ── */
+label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+textarea, input[type=text] {
+  width: 100%;
+  font-family: 'Lato', monospace;
+  font-size: 0.84rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 10px 13px;
+  background: var(--bg);
+  color: var(--body-text);
+  line-height: 1.55;
+  transition: border-color 0.15s;
+}
+textarea { resize: vertical; }
+textarea:focus, input[type=text]:focus { outline: none; border-color: var(--accent); }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px;
+  border-radius: 5px;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; border: none;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #243554; }
+.btn-accent { background: var(--accent); color: var(--primary); }
+.btn-accent:hover { background: #d4b05c; }
+.btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--warm); color: var(--body-text); }
+.btn-sm { padding: 5px 12px; font-size: 0.74rem; }
+.btn-icon { padding: 6px 8px; }
+
+/* ── Badge ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--warm); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 11px;
+  font-size: 0.78rem; font-weight: 700; color: var(--primary);
+}
+.badge-success { background: #f0fff4; border-color: #9ae6b4; color: #276749; }
+.bdot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.bdot-success { background: #48bb78; }
+.bdot-error { background: #e53e3e; }
+
+/* ── Alerts ── */
+.alert { padding: 10px 14px; border-radius: 5px; font-size: 0.86rem; margin-bottom: 14px; line-height: 1.45; }
+.alert-info { background: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; }
+.alert-error { background: #fff5f5; border: 1px solid #fcc; color: #c53030; }
+.alert-success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; }
+
+/* ── Divider ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+/* ────────────────────────────────────────────
+   IMAGE CLEANER
+──────────────────────────────────────────── */
+.cleaner-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.img-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+.img-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--warm);
+  overflow: hidden;
+}
+.img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.img-thumb-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(26,38,64,0.7);
+  color: white; font-size: 0.65rem; padding: 3px 5px;
+  text-align: center;
+}
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 48px 24px;
+  color: var(--muted); text-align: center; gap: 10px;
+  font-size: 0.88rem;
+}
+.empty-state svg { opacity: 0.35; }
+
+/* ────────────────────────────────────────────
+   BLOG FORMATTER
+──────────────────────────────────────────── */
+.formatter-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  height: 560px;
+}
+.formatter-left { display: flex; flex-direction: column; gap: 14px; }
+.formatter-left .card { flex: 1; display: flex; flex-direction: column; }
+.formatter-left textarea { flex: 1; min-height: 320px; }
+.preview-wrap { position: relative; height: 100%; min-height: 500px; }
+.preview-iframe {
+  width: 100%; height: 100%;
+  border: 1px solid var(--border); border-radius: 5px;
+  background: white;
+}
+.preview-empty {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; color: var(--muted); font-size: 0.88rem;
+  border: 1px solid var(--border); border-radius: 5px;
+  background: white;
+}
+
+/* ── Theme Picker ── */
+.theme-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.theme-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 11px;
+  border: 2px solid var(--border);
+  border-radius: 5px; background: white;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.74rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  color: var(--body-text);
+}
+.theme-btn:hover { background: var(--warm); }
+.theme-btn.active { border-color: var(--accent); background: var(--warm); }
+.theme-dots { display: flex; gap: 3px; }
+.theme-dots span { width: 9px; height: 9px; border-radius: 50%; }
+
+/* ── Output row ── */
+.output-row {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 7px;
+}
+
+/* ────────────────────────────────────────────
+   BLOGGER CONNECT
+──────────────────────────────────────────── */
+.setup-card {
+  background: var(--warm); border: 1px solid var(--border);
+  border-radius: 8px; padding: 28px 30px; max-width: 580px;
+}
+.setup-steps { list-style: none; margin: 18px 0; }
+.setup-steps li {
+  display: flex; gap: 14px; padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem; line-height: 1.5; color: var(--body-text);
+}
+.setup-steps li:last-child { border-bottom: none; }
+.step-num {
+  min-width: 22px; height: 22px; background: var(--primary);
+  color: white; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+}
+code {
+  background: var(--border); padding: 1px 5px; border-radius: 3px;
+  font-family: monospace; font-size: 0.85em;
+}
+
+.blogger-body {
+  display: grid; grid-template-columns: 270px 1fr;
+  gap: 20px; margin-top: 20px;
+}
+.posts-panel { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.posts-panel-head {
+  background: var(--primary); color: white;
+  padding: 11px 15px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.posts-scroll { overflow-y: auto; max-height: 520px; }
+.post-item {
+  padding: 11px 15px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.12s;
+}
+.post-item:hover { background: var(--warm); }
+.post-item.selected { background: var(--warm); border-left: 3px solid var(--accent); padding-left: 12px; }
+.post-item-title { font-size: 0.86rem; color: var(--primary); line-height: 1.35; margin-bottom: 3px; }
+.post-item-meta { font-size: 0.72rem; color: var(--muted); }
+.posts-more { padding: 10px; text-align: center; border-top: 1px solid var(--border); }
+
+.editor-panel { display: flex; flex-direction: column; gap: 14px; }
+.editor-toolbar { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+
+/* ── Utility ── */
+.flex { display: flex; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 14px; }
+.mt-4 { margin-top: 20px; }
+.mb-1 { margin-bottom: 5px; }
+.mb-2 { margin-bottom: 9px; }
+.text-muted { color: var(--muted); font-size: 0.84rem; }
+.hidden { display: none !important; }
+.spacer { flex: 1; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; top: 68px; right: 18px; z-index: 9999;
+  padding: 11px 18px; border-radius: 6px;
+  font-family: 'Lato', sans-serif; font-size: 0.85rem; font-weight: 400;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ── Input group ── */
+.input-group { display: flex; }
+.input-group input[type=text] {
+  border-right: none;
+  border-radius: 5px 0 0 5px;
+}
+.input-group .btn { border-radius: 0 5px 5px 0; }
+
+@media (max-width: 860px) {
+  .cleaner-grid,
+  .formatter-split,
+  .blogger-body { grid-template-columns: 1fr; }
+  .formatter-split { height: auto; }
+  .preview-wrap { min-height: 380px; }
+  #bottom-grid { grid-template-columns: 1fr !important; }
+  #formatter-output-card { grid-column: 1 !important; }
+  #gemini-setup > div:last-of-type { grid-template-columns: 1fr !important; }
+  #gemini-setup { width: 92vw !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="app-header">
+  <div class="app-logo">
+    <div class="logo-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 4h12M2 8h8M2 12h10" stroke="#1a2640" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="app-logo-text">Blogger<span> Tools</span></span>
+  </div>
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('formatter')">Blog Formatter</button>
+    <button class="tab-btn" onclick="switchTab('cleaner')">Image Cleaner</button>
+    <button class="tab-btn" onclick="switchTab('blogger')" id="blogger-tab-btn">Blogger Connect</button>
+    <button class="tab-btn" onclick="switchTab('about')">About</button>
+  </nav>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+    <span style="font-size:0.72rem;color:rgba(255,255,255,0.35);letter-spacing:0.08em;">blogtester</span>
+    <a href="/logout" style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);text-decoration:none;border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:4px 10px;transition:color 0.15s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">Sign Out</a>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+
+<!-- ─────────────────────────────────────────
+     TAB 1 · IMAGE CLEANER
+───────────────────────────────────────────── -->
+<div id="tab-cleaner" class="tab-pane">
+  <h1 class="page-title">Image Extractor</h1>
+  <p class="page-desc">Paste any Blogger HTML to pull out all <code>&lt;a&gt;&lt;img&gt;&lt;/a&gt;</code> image blocks — clean and ready to copy back.</p>
+
+  <div class="cleaner-grid">
+
+    <!-- Input -->
+    <div class="card" style="display:flex;flex-direction:column;gap:10px;">
+      <label>Paste HTML Here</label>
+      <textarea id="cleaner-input" rows="18"
+        placeholder="Paste your Blogger post HTML here...&#10;&#10;The tool will extract every &lt;a href=&quot;...&quot;&gt;&lt;img ...&gt;&lt;/a&gt; image block."></textarea>
+      <div class="flex gap-2 mt-2">
+        <button class="btn btn-primary" onclick="cleanImages(this)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Extract Images
+        </button>
+        <button class="btn btn-outline" onclick="clearCleaner()">Clear</button>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="card">
+      <div id="cleaner-empty" class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9l4-4 4 4 4-4 4 4"/>
+          <circle cx="8.5" cy="14.5" r="1.5"/>
+        </svg>
+        <span>Paste HTML on the left and click<br><strong>Extract Images</strong></span>
+      </div>
+      <div id="cleaner-results" class="hidden">
+        <div class="flex gap-2 mb-2" style="align-items:center;justify-content:space-between;flex-wrap:wrap;">
+          <span id="cleaner-badge" class="badge badge-success">
+            <span class="bdot bdot-success"></span>
+            <span id="cleaner-count-text">0 images found</span>
+          </span>
+          <button class="btn btn-accent btn-sm" onclick="copyText('cleaner-output', this)">⧉ Copy All HTML</button>
+        </div>
+        <div id="cleaner-img-grid" class="img-preview-grid"></div>
+        <hr class="divider">
+        <div class="output-row">
+          <label style="margin:0;">Extracted Image HTML</label>
+        </div>
+        <textarea id="cleaner-output" rows="9" readonly></textarea>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────
+     TAB 2 · IMAGE CLEANER
+───────────────────────────────────────────── -->
+<div id="tab-formatter" class="tab-pane active">
+  <h1 class="page-title">Blog Formatter</h1>
+  <p class="page-desc">Paste plain text or light markdown — choose a color theme and get beautiful Blogger-ready HTML with fully inlined styles.</p>
+
+  <!-- Theme picker -->
+  <div class="card mb-2" style="margin-bottom:16px;">
+    <label>Color Theme</label>
+    <div id="theme-row" class="theme-row"></div>
+  </div>
+
+  <!-- Split: input | preview -->
+  <div class="formatter-split">
+    <div class="formatter-left">
+      <div class="card" style="flex:1;display:flex;flex-direction:column;gap:10px;">
+        <div class="flex gap-2" style="align-items:center;justify-content:space-between;">
+          <label style="margin:0;">Your Text / Markdown</label>
+          <button class="btn btn-outline btn-sm" onclick="loadSample()">Load Sample</button>
+        </div>
+        <textarea id="formatter-input" style="flex:1;min-height:340px;"
+          placeholder="TITLE: My Post Title&#10;SUBTITLE: Optional italic subtitle&#10;EYEBROW: Feature&#10;STATS: 5 Items | 3 Days | $200 Total&#10;&#10;# Section Heading&#10;&#10;Regular paragraph text here.&#10;&#10;- **Item name** — description&#10;&#10;&gt; This is a callout block."></textarea>
+        <div class="flex gap-2" style="flex-wrap:wrap;">
+          <button id="smart-btn" class="btn btn-accent" onclick="smartFormat(this)" title="Uses Google Gemini AI to auto-structure your text, detect sections, and generate KPI stats">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+            Smart Format (AI)
+          </button>
+          <button class="btn btn-primary" onclick="formatPost(this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Format Post
+          </button>
+          <button class="btn btn-outline" onclick="clearFormatter()">Clear</button>
+          <button class="btn btn-outline btn-sm btn-icon" onclick="toggleGeminiSettings()" title="Gemini API key settings" style="margin-left:auto;">⚙</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div id="preview-empty" class="preview-empty">
+        <div>
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="display:block;margin:0 auto 10px;opacity:0.35"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Preview appears here after formatting
+        </div>
+      </div>
+      <iframe id="formatter-preview" class="preview-iframe hidden" title="Post preview"></iframe>
+    </div>
+  </div>
+
+  <!-- HTML stripped notice -->
+  <div id="html-stripped-notice" class="alert alert-info hidden" style="margin-top:16px;">
+    <strong>HTML input detected.</strong> Tags were automatically stripped to plain text before formatting.
+    For best results, paste plain text or <a href="#" onclick="showMarkdownHelp();return false;" style="color:inherit;font-weight:700;">light markdown</a> — not existing HTML.
+  </div>
+
+  <!-- 2-col: HTML output | AI review -->
+  <div id="bottom-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start;">
+
+    <!-- HTML output (col 1) -->
+    <div id="formatter-output-card" class="card" style="grid-column:1/-1;">
+      <div class="output-row">
+        <label style="margin:0;">Formatted HTML — paste this into Blogger's HTML editor</label>
+        <div class="flex gap-2">
+          <button class="btn btn-accent btn-sm" onclick="copyFormatterHTML(this)" title="Copy HTML and auto-extract images into Image Cleaner">⧉ Copy HTML</button>
+          <button id="copy-both-btn" class="btn btn-outline btn-sm hidden" onclick="copyBothHTML(this)" title="Copy formatted HTML + extracted image HTML combined">⧉ Copy Both</button>
+        </div>
+      </div>
+      <textarea id="formatter-output" rows="10" readonly
+        placeholder="Formatted HTML will appear here after you click Format Post..."></textarea>
+    </div>
+
+    <!-- AI structured text review (col 2) -->
+    <div id="ai-review-card" class="card hidden">
+      <div class="output-row">
+        <label style="margin:0;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px;color:var(--accent)"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+          AI Markdown — review &amp; edit, then re-render
+        </label>
+        <button class="btn btn-primary btn-sm" onclick="formatFromAIReview(this)">↻ Re-render</button>
+      </div>
+      <textarea id="ai-structured-text" rows="10" style="font-family:monospace;font-size:0.81rem;"></textarea>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────
+     TAB 3 · BLOGGER CONNECT
+───────────────────────────────────────────── -->
+<div id="tab-blogger" class="tab-pane">
+  <h1 class="page-title">Blogger Connect</h1>
+  <p class="page-desc">Connect to your Blogger account via Google OAuth to pull post HTML, extract images, apply themes, and push changes back — all without leaving this tool.</p>
+
+  <!-- ── NOT CONNECTED ── -->
+  <div id="view-disconnected">
+    <div class="setup-card">
+      <div class="flex gap-2 mb-2" style="align-items:center;">
+        <span class="badge"><span class="bdot bdot-error"></span> Not Connected</span>
+      </div>
+      <h3 style="font-family:'Playfair Display',serif;color:var(--primary);margin:10px 0 6px;font-size:1.15rem;">One-time Google API setup</h3>
+      <p class="text-muted" style="margin-bottom:4px;">You only need to do this once. After that, the token is stored locally.</p>
+
+      <ol class="setup-steps">
+        <li>
+          <span class="step-num">1</span>
+          <span>Go to <strong>console.cloud.google.com</strong> → create a project → search <strong>Blogger API v3</strong> and enable it.</span>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <span>Under <em>Credentials</em>, create <strong>OAuth 2.0 Client ID</strong> (type: Web application). Add <code>http://localhost:5000/blogger/callback</code> as an authorized redirect URI.</span>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <span>Download the JSON file and save it as <code>config/credentials.json</code> inside the <strong>blogger_tool</strong> folder.</span>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          <span>Click <strong>Connect with Google</strong> below. You'll be redirected to Google to authorize, then returned here.</span>
+        </li>
+      </ol>
+
+      <div id="no-creds-alert" class="alert alert-error hidden">
+        <strong>config/credentials.json not found.</strong> Complete steps 1–3 first, then refresh this page.
+      </div>
+
+      <a href="/blogger/auth" class="btn btn-primary" style="margin-top:10px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+          <path d="M21.6 12.2c0-.7-.06-1.36-.18-2H12v3.79h5.41c-.23 1.22-.95 2.26-2.02 2.95v2.45h3.27C20.6 17.61 21.6 15.07 21.6 12.2z" fill="#4285F4"/>
+          <path d="M12 22c2.7 0 4.96-.9 6.61-2.42l-3.27-2.53c-.9.6-2.05.96-3.34.96-2.57 0-4.74-1.74-5.52-4.07H3.16v2.62C4.8 19.76 8.17 22 12 22z" fill="#34A853"/>
+          <path d="M6.48 13.94A5.85 5.85 0 016.16 12c0-.67.12-1.32.32-1.94V7.44H3.16A9.99 9.99 0 002 12c0 1.61.38 3.14 1.16 4.56l3.32-2.62z" fill="#FBBC05"/>
+          <path d="M12 6.06c1.46 0 2.77.5 3.8 1.5l2.85-2.85C16.95 3.07 14.69 2 12 2 8.17 2 4.8 4.24 3.16 7.44l3.32 2.62C7.26 7.8 9.43 6.06 12 6.06z" fill="#EA4335"/>
+        </svg>
+        Connect with Google
+      </a>
+    </div>
+  </div>
+
+  <!-- ── CONNECTED ── -->
+  <div id="view-connected" class="hidden">
+    <div class="flex gap-2 mb-2" style="align-items:center;flex-wrap:wrap;">
+      <span class="badge badge-success"><span class="bdot bdot-success"></span> Connected to Google</span>
+      <button class="btn btn-outline btn-sm" onclick="disconnectBlogger()">Disconnect</button>
+    </div>
+
+    <!-- Blog loader -->
+    <div class="card mt-3" style="margin-top:14px;margin-bottom:16px;">
+      <label>Blog URL or Blog ID</label>
+      <div class="input-group">
+        <input type="text" id="blog-url-input" placeholder="https://yourblog.here.com  or  paste the numeric blog ID">
+        <button class="btn btn-primary" onclick="loadBlog(this)">Load Blog</button>
+      </div>
+      <div id="blog-info" class="hidden mt-2" style="margin-top:10px;">
+        <span class="badge"><span class="bdot"></span> <span id="blog-name-text"></span></span>
+        <span class="text-muted" style="margin-left:8px;font-size:0.78rem;"><span id="blog-post-count"></span> posts</span>
+      </div>
+    </div>
+
+    <!-- Posts + Editor (shown after blog loads) -->
+    <div id="blogger-body" class="blogger-body hidden">
+
+      <!-- Posts sidebar -->
+      <div class="posts-panel">
+        <div class="posts-panel-head">
+          Posts
+          <button class="btn btn-outline btn-sm btn-icon" onclick="loadPosts()" title="Refresh" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);padding:3px 7px;">↺</button>
+        </div>
+        <!-- Year filter -->
+        <div style="padding:8px 10px;border-bottom:1px solid var(--border);background:var(--warm);display:flex;flex-wrap:wrap;gap:5px;align-items:center;">
+          <span style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);flex-shrink:0;">Year</span>
+          <div id="year-filter-btns" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+        </div>
+        <div id="posts-scroll" class="posts-scroll">
+          <div class="empty-state" style="padding:32px 16px;">Loading…</div>
+        </div>
+        <div id="posts-more" class="posts-more hidden">
+          <button class="btn btn-outline btn-sm" onclick="loadMorePosts()">Load More</button>
+        </div>
+      </div>
+
+      <!-- Right side -->
+      <div>
+        <div id="editor-empty" class="empty-state card" style="min-height:280px;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:0.35"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Select a post from the list</span>
+        </div>
+
+        <div id="post-editor" class="editor-panel hidden">
+          <!-- Title bar -->
+          <div class="card" style="padding:14px 18px;">
+            <div class="flex gap-2" style="align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <h3 id="post-editor-title" style="font-family:'Playfair Display',serif;color:var(--primary);font-size:1.1rem;flex:1;line-height:1.3;"></h3>
+              <a id="post-view-link" href="#" target="_blank" class="btn btn-outline btn-sm" style="flex-shrink:0;">View ↗</a>
+            </div>
+            <div id="post-labels-row" class="hidden" style="margin-top:8px;"></div>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="card" style="padding:12px 16px;">
+            <div class="editor-toolbar">
+              <button class="btn btn-primary btn-sm" onclick="reformatAndExtract(this)" title="Format post with active theme, extract images, and append them at the end — all in one step">⚡ Reformat + Images</button>
+              <button class="btn btn-outline btn-sm" onclick="extractFromPost(this)">⊞ Extract Images</button>
+              <button class="btn btn-outline btn-sm" onclick="sendToFormatter()">◑ Format with Theme</button>
+              <button class="btn btn-outline btn-sm btn-icon" onclick="toggleGeminiSettings()" title="Gemini API key &amp; model settings">⚙</button>
+              <div class="spacer"></div>
+              <button class="btn btn-accent btn-sm" onclick="savePost(this)">↑ Save to Blogger</button>
+            </div>
+          </div>
+
+          <!-- Post HTML -->
+          <div class="card">
+            <div class="output-row">
+              <label style="margin:0;">Post HTML Content</label>
+              <button class="btn btn-outline btn-sm" onclick="copyText('post-html', this)">⧉ Copy</button>
+            </div>
+            <textarea id="post-html" rows="14" oninput="refreshPostPreview()"></textarea>
+          </div>
+
+          <!-- Post Preview -->
+          <div class="card">
+            <label style="margin-bottom:10px;">Preview</label>
+            <iframe id="post-preview" style="width:100%;height:620px;border:1px solid var(--border);border-radius:5px;background:white;" title="Post preview"></iframe>
+          </div>
+
+          <!-- Extracted images (shown after Extract) -->
+          <div id="post-images-card" class="card hidden">
+            <div class="output-row">
+              <label style="margin:0;">Images in this post (<span id="post-img-count">0</span>)</label>
+              <button class="btn btn-accent btn-sm" onclick="copyText('post-img-html', this)">⧉ Copy All Image HTML</button>
+            </div>
+            <div id="post-img-grid" class="img-preview-grid" style="margin-bottom:12px;"></div>
+            <textarea id="post-img-html" rows="5" readonly></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /blogger-body -->
+  </div><!-- /view-connected -->
+</div><!-- /tab-blogger -->
+
+
+<!-- ─────────────────────────────────────────
+     TAB 4 · ABOUT
+───────────────────────────────────────────── -->
+<div id="tab-about" class="tab-pane">
+  <div style="max-width:780px;margin:0 auto;">
+
+    <!-- Hero -->
+    <div style="background:var(--primary);border-radius:10px;padding:36px 40px;margin-bottom:24px;color:white;">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Blog Management Tools</div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-bottom:10px;line-height:1.2;">Blogger Tools</h1>
+      <p style="font-size:0.95rem;color:rgba(255,255,255,0.75);line-height:1.6;max-width:560px;">A local web app for formatting, styling, and managing blog posts on Blogger.com — built for speed and for the way you actually write.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;">
+        <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 14px;font-size:0.78rem;color:rgba(255,255,255,0.7);">Created April 18, 2026</span>
+        <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 14px;font-size:0.78rem;color:rgba(255,255,255,0.7);">Built with VS Code &amp; Claude Code</span>
+        <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 14px;font-size:0.78rem;color:rgba(255,255,255,0.7);">Python · Flask · Google APIs</span>
+      </div>
+    </div>
+
+    <!-- Tools overview -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2640" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;">Blog Formatter</div>
+        </div>
+        <p style="font-size:0.86rem;color:var(--body-text);line-height:1.6;margin-bottom:10px;">Paste plain text or light markdown and get fully styled, inline-CSS Blogger-ready HTML. Choose from 7 color themes. Handles sections, lists, callouts, tables, and image grids automatically.</p>
+        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">How to use</div>
+        <ol style="font-size:0.83rem;color:var(--body-text);line-height:1.7;padding-left:18px;margin:0;">
+          <li>Paste your text into the input box</li>
+          <li>Click <strong>Smart Format (AI)</strong> to let Gemini structure it, or <strong>Format Post</strong> for manual markdown</li>
+          <li>Pick a color theme from the row of swatches</li>
+          <li>Copy the HTML and paste into Blogger's HTML editor</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2640" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9l4-4 4 4 4-4 4 4"/><circle cx="8.5" cy="14.5" r="1.5"/></svg>
+          </div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;">Image Cleaner</div>
+        </div>
+        <p style="font-size:0.86rem;color:var(--body-text);line-height:1.6;margin-bottom:10px;">Paste any Blogger post HTML to extract every <code>&lt;a&gt;&lt;img&gt;&lt;/a&gt;</code> image block — stripped clean and ready to copy back in. Shows a thumbnail grid so you can see what was found.</p>
+        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">How to use</div>
+        <ol style="font-size:0.83rem;color:var(--body-text);line-height:1.7;padding-left:18px;margin:0;">
+          <li>Paste Blogger HTML into the input box</li>
+          <li>Click <strong>Extract Images</strong></li>
+          <li>Review the thumbnail preview grid</li>
+          <li>Click <strong>Copy All HTML</strong> and paste back into Blogger</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2640" stroke-width="2"><path d="M21.6 12.2c0-.7-.06-1.36-.18-2H12v3.79h5.41c-.23 1.22-.95 2.26-2.02 2.95v2.45h3.27C20.6 17.61 21.6 15.07 21.6 12.2z" fill="#4285F4"/><path d="M12 22c2.7 0 4.96-.9 6.61-2.42l-3.27-2.53c-.9.6-2.05.96-3.34.96-2.57 0-4.74-1.74-5.52-4.07H3.16v2.62C4.8 19.76 8.17 22 12 22z" fill="#34A853"/><path d="M6.48 13.94A5.85 5.85 0 016.16 12c0-.67.12-1.32.32-1.94V7.44H3.16A9.99 9.99 0 002 12c0 1.61.38 3.14 1.16 4.56l3.32-2.62z" fill="#FBBC05"/><path d="M12 6.06c1.46 0 2.77.5 3.8 1.5l2.85-2.85C16.95 3.07 14.69 2 12 2 8.17 2 4.8 4.24 3.16 7.44l3.32 2.62C7.26 7.8 9.43 6.06 12 6.06z" fill="#EA4335"/></svg>
+          </div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;">Blogger Connect</div>
+        </div>
+        <p style="font-size:0.86rem;color:var(--body-text);line-height:1.6;margin-bottom:10px;">OAuth connection to your Blogger account. Browse posts by year, load HTML, reformat with AI, extract images, and push changes back — without ever leaving this app.</p>
+        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">How to use</div>
+        <ol style="font-size:0.83rem;color:var(--body-text);line-height:1.7;padding-left:18px;margin:0;">
+          <li>Set up OAuth credentials in Google Cloud Console (one-time)</li>
+          <li>Click <strong>Connect with Google</strong> and authorize</li>
+          <li>Enter your blog URL to load posts</li>
+          <li>Filter by year, pick a post, then use <strong>⚡ Reformat + Images</strong></li>
+          <li>Review the preview and click <strong>↑ Save to Blogger</strong></li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2640" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+          </div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;">Smart Format (AI)</div>
+        </div>
+        <p style="font-size:0.86rem;color:var(--body-text);line-height:1.6;margin-bottom:10px;">Powered by Google Gemini. Paste raw text and the AI auto-detects sections, generates KPI stats, structures lists and tables, and produces clean markdown ready to render. Switch models in ⚙ if you hit a daily quota limit.</p>
+        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">Setup</div>
+        <ol style="font-size:0.83rem;color:var(--body-text);line-height:1.7;padding-left:18px;margin:0;">
+          <li>Get a free key at <strong>aistudio.google.com</strong></li>
+          <li>Click ⚙ in Blog Formatter and paste the key</li>
+          <li>Pick a model — <strong>Gemini 2.5 Flash</strong> is the default</li>
+          <li>Click <strong>Smart Format (AI)</strong> — review the markdown and re-render if needed</li>
+        </ol>
+      </div>
+
+    </div>
+
+    <!-- Input format reference -->
+    <div class="card" style="margin-bottom:24px;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;margin-bottom:12px;">Formatter Input Syntax</div>
+      <p style="font-size:0.84rem;color:var(--muted);margin-bottom:14px;">For manual formatting (or to review what Smart Format produces). Smart Format handles this automatically so you don't need to memorise it.</p>
+      <pre style="background:var(--warm);border:1px solid var(--border);border-radius:6px;padding:16px;font-size:0.8rem;line-height:1.7;overflow-x:auto;color:var(--body-text);white-space:pre-wrap;">TITLE: My Post Title
+SUBTITLE: Optional italic subtitle
+EYEBROW: Travel Journal
+STATS: 13 Days | ~1,400 Miles | 4 Cities
+
+# Section Heading
+
+Regular paragraph text here.
+
+## Sub-label
+
+- <strong>Item Name</strong> — description of the item
+
+&gt; Tip or callout text — styled with a gold left border.
+
+| Column A | Column B |
+|----------|----------|
+| value    | value    |
+
+FOOTER: Thanks for reading.</pre>
+    </div>
+
+    <!-- Built with -->
+    <div class="card" style="background:var(--warm);">
+      <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;margin-bottom:14px;">Built With</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <span class="badge">Python 3 · Flask</span>
+        <span class="badge">BeautifulSoup4</span>
+        <span class="badge">Google Gemini API</span>
+        <span class="badge">Blogger API v3</span>
+        <span class="badge">Google OAuth2</span>
+        <span class="badge">VS Code</span>
+        <span class="badge">Claude Code</span>
+      </div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-top:14px;line-height:1.6;">
+        Created <strong>April 18, 2026</strong>.<br>
+        Built entirely using <strong>VS Code</strong> with <strong>Claude Code</strong> (Anthropic AI) as the coding assistant.<br>
+        Runs locally on your machine — no data leaves your computer except API calls to Google.<br><br>
+        Source code: <a href="https://github.com/WSUN2019/blogger_tool" target="_blank" style="color:var(--primary);font-weight:700;">github.com/WSUN2019/blogger_tool</a>
+      </p>
+    </div>
+
+  </div>
+</div><!-- /tab-about -->
+
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let themes = [];
+let activeTheme = 'navy_gold';
+let blogId = null;
+let nextPageToken = null;
+let activePostId = null;
+let activeYear = '';
+
+// ═══════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const order = ['formatter', 'cleaner', 'blogger', 'about'];
+  document.querySelectorAll('.tab-btn')[order.indexOf(name)].classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  IMAGE CLEANER
+// ═══════════════════════════════════════════
+async function cleanImages(btn) {
+  const html = document.getElementById('cleaner-input').value.trim();
+  if (!html) return;
+  setBtnLoading(btn, true);
+  try {
+    const data = await post('/api/clean', {html});
+    document.getElementById('cleaner-empty').classList.add('hidden');
+    document.getElementById('cleaner-results').classList.remove('hidden');
+    document.getElementById('cleaner-count-text').textContent =
+      `${data.count} image${data.count !== 1 ? 's' : ''} found`;
+    document.getElementById('cleaner-output').value = data.html;
+    renderImgGrid('cleaner-img-grid', data.tags);
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+function clearCleaner() {
+  document.getElementById('cleaner-input').value = '';
+  document.getElementById('cleaner-results').classList.add('hidden');
+  document.getElementById('cleaner-empty').classList.remove('hidden');
+  document.getElementById('cleaner-img-grid').innerHTML = '';
+}
+
+// ═══════════════════════════════════════════
+//  BLOG FORMATTER
+// ═══════════════════════════════════════════
+async function loadThemes() {
+  const data = await get('/api/themes');
+  themes = data.themes;
+  const row = document.getElementById('theme-row');
+  row.innerHTML = '';
+  themes.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'theme-btn' + (t.key === activeTheme ? ' active' : '');
+    btn.dataset.key = t.key;
+    btn.onclick = () => selectTheme(t.key);
+    const label = t.name.split(' (')[0];
+    btn.innerHTML = `
+      <div class="theme-dots">
+        <span style="background:${t.primary}"></span>
+        <span style="background:${t.accent}"></span>
+      </div>
+      ${label}`;
+    row.appendChild(btn);
+  });
+}
+
+function selectTheme(key) {
+  activeTheme = key;
+  document.querySelectorAll('.theme-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.key === key));
+  if (document.getElementById('formatter-output').value) formatPost();
+}
+
+async function formatPost(btn) {
+  const text = document.getElementById('formatter-input').value.trim();
+  if (!text) return;
+  if (btn) setBtnLoading(btn, true);
+  try {
+    const data = await post('/api/format', {text, theme: activeTheme});
+    document.getElementById('formatter-output').value = data.html;
+    const iframe = document.getElementById('formatter-preview');
+    iframe.classList.remove('hidden');
+    document.getElementById('preview-empty').classList.add('hidden');
+    iframe.srcdoc = data.html;
+    // Show/hide the HTML-stripped notice
+    document.getElementById('html-stripped-notice')
+      .classList.toggle('hidden', !data.html_stripped);
+  } finally {
+    if (btn) setBtnLoading(btn, false);
+  }
+}
+
+function updateBottomLayout() {
+  const aiHidden = document.getElementById('ai-review-card').classList.contains('hidden');
+  // Output card is col 1; when AI card is hidden it spans both columns
+  document.getElementById('formatter-output-card').style.gridColumn = aiHidden ? '1/-1' : '1';
+}
+
+function clearFormatter() {
+  document.getElementById('formatter-input').value = '';
+  document.getElementById('formatter-output').value = '';
+  document.getElementById('formatter-preview').classList.add('hidden');
+  document.getElementById('preview-empty').classList.remove('hidden');
+  document.getElementById('html-stripped-notice').classList.add('hidden');
+  document.getElementById('ai-review-card').classList.add('hidden');
+  updateBottomLayout();
+}
+
+function showMarkdownHelp() {
+  toast('Use: TITLE: My Post  |  # Section  |  - **Bold** — desc  |  > callout  |  | col | col |', 'info');
+}
+
+// ═══════════════════════════════════════════
+//  GEMINI SMART FORMAT
+// ═══════════════════════════════════════════
+let geminiConfigured = false;
+let geminiModel = 'gemini-2.5-flash';
+
+async function checkGeminiStatus() {
+  const data = await get('/api/gemini-status');
+  geminiConfigured = data.configured;
+  geminiModel = data.model || 'gemini-2.5-flash';
+  if (!geminiConfigured) {
+    document.getElementById('gemini-setup').classList.remove('hidden');
+  }
+  buildModelPicker(data.models || [], geminiModel);
+  updateSmartBtnStyle();
+}
+
+function buildModelPicker(models, activeId) {
+  const wrap = document.getElementById('gemini-model-btns');
+  wrap.innerHTML = '';
+  models.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-outline btn-sm' + (m.id === activeId ? ' active' : '');
+    btn.style.cssText = m.id === activeId
+      ? 'border-color:var(--accent);background:var(--warm);color:var(--primary);'
+      : '';
+    btn.textContent = m.label;
+    btn.dataset.id = m.id;
+    btn.onclick = () => selectGeminiModel(m.id, m.label);
+    wrap.appendChild(btn);
+  });
+}
+
+async function selectGeminiModel(id, label) {
+  const statusEl = document.getElementById('gemini-model-status');
+  statusEl.textContent = 'Saving…';
+  const data = await post('/api/save-gemini-model', {model: id});
+  if (data.error) { statusEl.textContent = 'Error: ' + data.error; return; }
+  geminiModel = id;
+  buildModelPicker(
+    Array.from(document.getElementById('gemini-model-btns').querySelectorAll('button'))
+      .map(b => ({id: b.dataset.id, label: b.textContent})),
+    id
+  );
+  statusEl.textContent = '✓ Model set to ' + label;
+  setTimeout(() => { statusEl.textContent = ''; }, 2000);
+}
+
+function updateSmartBtnStyle() {
+  const btn = document.getElementById('smart-btn');
+  if (!geminiConfigured) {
+    btn.style.opacity = '0.6';
+    btn.title = 'Gemini API key required — click ⚙ to set up';
+  } else {
+    btn.style.opacity = '1';
+    btn.title = 'Uses Google Gemini AI to auto-structure your text';
+  }
+}
+
+function toggleGeminiSettings() {
+  document.getElementById('gemini-setup').classList.toggle('hidden');
+  document.getElementById('gemini-setup-backdrop').classList.toggle('hidden');
+}
+
+async function saveGeminiKey(btn) {
+  const key = document.getElementById('gemini-key-input').value.trim();
+  if (!key) { toast('Paste your API key first', 'error'); return; }
+  setBtnLoading(btn, true);
+  try {
+    await post('/api/save-gemini-key', {key});
+    geminiConfigured = true;
+    updateSmartBtnStyle();
+    document.getElementById('gemini-key-status').textContent = '✓ Key saved';
+    document.getElementById('gemini-key-input').value = '';
+    setTimeout(() => document.getElementById('gemini-setup').classList.add('hidden'), 1200);
+    toast('Gemini API key saved!', 'success');
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+async function smartFormat(btn) {
+  if (!geminiConfigured) {
+    document.getElementById('gemini-setup').classList.remove('hidden');
+    toast('Enter your Gemini API key first', 'info');
+    return;
+  }
+  const text = document.getElementById('formatter-input').value.trim();
+  if (!text) { toast('Paste some text first', 'info'); return; }
+
+  setBtnLoading(btn, true);
+  try {
+    const data = await post('/api/smart-format', {text, theme: activeTheme, model: geminiModel});
+
+    if (data.error === 'no_key') {
+      document.getElementById('gemini-setup').classList.remove('hidden');
+      toast('Gemini API key needed', 'error');
+      return;
+    }
+    if (data.error) {
+      toast('Gemini error: ' + data.error, 'error');
+      return;
+    }
+
+    // Show the AI-structured markdown for review
+    document.getElementById('ai-review-card').classList.remove('hidden');
+    updateBottomLayout();
+    document.getElementById('ai-structured-text').value = data.structured_text;
+
+    // Show preview + HTML output
+    document.getElementById('formatter-output').value = data.html;
+    const iframe = document.getElementById('formatter-preview');
+    iframe.classList.remove('hidden');
+    document.getElementById('preview-empty').classList.add('hidden');
+    iframe.srcdoc = data.html;
+    document.getElementById('html-stripped-notice').classList.add('hidden');
+
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+async function formatFromAIReview(btn) {
+  // Re-render from the edited AI markdown
+  const text = document.getElementById('ai-structured-text').value.trim();
+  if (!text) return;
+  setBtnLoading(btn, true);
+  try {
+    const data = await post('/api/format', {text, theme: activeTheme});
+    document.getElementById('formatter-output').value = data.html;
+    const iframe = document.getElementById('formatter-preview');
+    iframe.classList.remove('hidden');
+    document.getElementById('preview-empty').classList.add('hidden');
+    iframe.srcdoc = data.html;
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+async function loadSample() {
+  const data = await get('/api/sample');
+  document.getElementById('formatter-input').value = data.text;
+}
+
+// ═══════════════════════════════════════════
+//  BLOGGER CONNECT
+// ═══════════════════════════════════════════
+async function checkBloggerStatus() {
+  const data = await get('/blogger/status');
+  document.getElementById('view-disconnected').classList.toggle('hidden', data.connected);
+  document.getElementById('view-connected').classList.toggle('hidden', !data.connected);
+  if (!data.connected && !data.has_credentials) {
+    document.getElementById('no-creds-alert').classList.remove('hidden');
+  }
+}
+
+async function disconnectBlogger() {
+  await post('/blogger/disconnect', {});
+  blogId = null;
+  document.getElementById('blogger-body').classList.add('hidden');
+  document.getElementById('blog-info').classList.add('hidden');
+  checkBloggerStatus();
+}
+
+async function loadBlog(btn) {
+  const raw = document.getElementById('blog-url-input').value.trim();
+  if (!raw) return;
+  setBtnLoading(btn, true);
+  try {
+    const param = /^\d+$/.test(raw) ? `id=${raw}` : `url=${encodeURIComponent(raw)}`;
+    const data = await get(`/blogger/blog?${param}`);
+    if (data.error) { toast(data.error, 'error'); return; }
+    blogId = data.id;
+    document.getElementById('blog-name-text').textContent = data.name;
+    document.getElementById('blog-post-count').textContent = data.posts;
+    document.getElementById('blog-info').classList.remove('hidden');
+    document.getElementById('blogger-body').classList.remove('hidden');
+    activeYear = '';
+    buildYearFilter();
+    await loadPosts();
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+function buildYearFilter() {
+  const wrap = document.getElementById('year-filter-btns');
+  wrap.innerHTML = '';
+  const currentYear = new Date().getFullYear();
+  const years = ['All'];
+  for (let y = currentYear; y >= 2014; y--) years.push(String(y));
+  years.forEach(y => {
+    const btn = document.createElement('button');
+    const isAll = y === 'All';
+    const active = isAll ? activeYear === '' : activeYear === y;
+    btn.className = 'btn btn-sm';
+    btn.style.cssText = active
+      ? 'background:var(--accent);color:var(--primary);border:none;padding:3px 8px;font-size:0.7rem;'
+      : 'background:white;color:var(--muted);border:1px solid var(--border);padding:3px 8px;font-size:0.7rem;';
+    btn.textContent = y;
+    btn.onclick = () => { activeYear = isAll ? '' : y; buildYearFilter(); loadPosts(); };
+    wrap.appendChild(btn);
+  });
+}
+
+async function loadPosts() {
+  if (!blogId) return;
+  const scroll = document.getElementById('posts-scroll');
+  scroll.innerHTML = '<div class="empty-state" style="padding:28px 16px;">Loading…</div>';
+  const yearParam = activeYear ? `&year=${activeYear}` : '';
+  const data = await get(`/blogger/posts?blog_id=${blogId}${yearParam}`);
+  if (data.error) {
+    scroll.innerHTML = `<div class="alert alert-error" style="margin:12px;">${data.error}</div>`;
+    return;
+  }
+  nextPageToken = data.next_page_token;
+  document.getElementById('posts-more').classList.toggle('hidden', !nextPageToken);
+  scroll.innerHTML = '';
+  appendPostItems(data.posts);
+}
+
+async function loadMorePosts() {
+  if (!nextPageToken || !blogId) return;
+  const yearParam = activeYear ? `&year=${activeYear}` : '';
+  const data = await get(`/blogger/posts?blog_id=${blogId}&page_token=${nextPageToken}${yearParam}`);
+  nextPageToken = data.next_page_token;
+  document.getElementById('posts-more').classList.toggle('hidden', !nextPageToken);
+  appendPostItems(data.posts);
+}
+
+function appendPostItems(posts) {
+  const scroll = document.getElementById('posts-scroll');
+  const offset = scroll.querySelectorAll('.post-item').length;
+  posts.forEach((p, i) => {
+    const num = offset + i + 1;
+    const el = document.createElement('div');
+    el.className = 'post-item';
+    el.dataset.id = p.id;
+    const d = p.published ? new Date(p.published).toLocaleDateString() : '';
+    el.innerHTML = `
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <span style="flex-shrink:0;min-width:22px;height:22px;background:var(--primary);color:var(--accent);border-radius:4px;font-size:0.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;">${num}</span>
+        <div style="min-width:0;">
+          <div class="post-item-title">${escHtml(p.title)}</div>
+          <div class="post-item-meta">${d}${p.status === 'DRAFT' ? ' · Draft' : ''}</div>
+        </div>
+      </div>`;
+    el.onclick = () => loadPost(p.id, el);
+    scroll.appendChild(el);
+  });
+}
+
+async function loadPost(postId, el) {
+  document.querySelectorAll('.post-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  activePostId = postId;
+  document.getElementById('editor-empty').classList.add('hidden');
+  document.getElementById('post-editor').classList.remove('hidden');
+  document.getElementById('post-images-card').classList.add('hidden');
+  document.getElementById('post-html').value = 'Loading…';
+
+  const data = await get(`/blogger/post/${postId}?blog_id=${blogId}`);
+  if (data.error) { toast(data.error, 'error'); return; }
+  document.getElementById('post-editor-title').textContent = data.title;
+  document.getElementById('post-view-link').href = data.url || '#';
+  document.getElementById('post-html').value = data.content || '';
+  document.getElementById('post-editor-title').dataset.labels = JSON.stringify(data.labels || []);
+  // Show labels under the title
+  const labelBadges = (data.labels || []).map(l =>
+    `<span style="display:inline-block;background:var(--warm);border:1px solid var(--border);border-radius:12px;padding:2px 9px;font-size:0.72rem;color:var(--muted);margin:2px 3px 2px 0;">${escHtml(l)}</span>`
+  ).join('');
+  document.getElementById('post-labels-row').innerHTML = labelBadges;
+  document.getElementById('post-labels-row').classList.toggle('hidden', !data.labels?.length);
+  refreshPostPreview();
+}
+
+async function extractFromPost(btn) {
+  const html = document.getElementById('post-html').value;
+  setBtnLoading(btn, true);
+  try {
+    const data = await post('/api/clean', {html});
+    document.getElementById('post-images-card').classList.remove('hidden');
+    document.getElementById('post-img-count').textContent = data.count;
+    document.getElementById('post-img-html').value = data.html;
+    renderImgGrid('post-img-grid', data.tags);
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+function refreshPostPreview() {
+  document.getElementById('post-preview').srcdoc =
+    document.getElementById('post-html').value || '';
+}
+
+function sendToFormatter() {
+  const html = document.getElementById('post-html').value;
+  document.getElementById('formatter-input').value = html;
+  switchTab('formatter');
+  formatPost();
+}
+
+async function reformatAndExtract(btn) {
+  const rawHtml = document.getElementById('post-html').value.trim();
+  if (!rawHtml) return;
+
+  if (!geminiConfigured) {
+    toast('Gemini API key needed — click ⚙ in Blog Formatter to set it up', 'error');
+    return;
+  }
+
+  setBtnLoading(btn, true);
+  try {
+    // Step 1: smart format via Gemini AI
+    const fmtData = await post('/api/smart-format', {text: rawHtml, theme: activeTheme, model: geminiModel});
+    if (fmtData.error === 'no_key') { toast('Gemini API key needed — click ⚙ in Blog Formatter', 'error'); return; }
+    if (fmtData.error) { toast('Smart Format error: ' + fmtData.error, 'error'); return; }
+    const formattedHtml = fmtData.html;
+
+    // Step 2: extract images from the ORIGINAL HTML (formatter converts <a><img> to flex grids, so they're gone from formattedHtml)
+    const cleanData = await post('/api/clean', {html: rawHtml});
+
+    // Step 3: combine — formatted HTML then extracted image block at the end
+    let combined = formattedHtml;
+    if (cleanData.count > 0) {
+      combined += '\n\n<!-- Extracted Images -->\n' + cleanData.html;
+    }
+
+    // Update post HTML editor
+    document.getElementById('post-html').value = combined;
+
+    // Show image results in the images card
+    document.getElementById('post-images-card').classList.remove('hidden');
+    document.getElementById('post-img-count').textContent = cleanData.count;
+    document.getElementById('post-img-html').value = cleanData.html;
+    renderImgGrid('post-img-grid', cleanData.tags);
+
+    // Also sync formatter + cleaner tabs so they reflect the work
+    document.getElementById('formatter-input').value = rawHtml;
+    document.getElementById('formatter-output').value = formattedHtml;
+    if (fmtData.structured_text) {
+      document.getElementById('ai-structured-text').value = fmtData.structured_text;
+      document.getElementById('ai-review-card').classList.remove('hidden');
+      updateBottomLayout();
+    }
+    document.getElementById('cleaner-input').value = formattedHtml;
+    document.getElementById('cleaner-output').value = cleanData.html;
+    if (cleanData.count > 0) {
+      document.getElementById('cleaner-empty').classList.add('hidden');
+      document.getElementById('cleaner-results').classList.remove('hidden');
+      document.getElementById('cleaner-count-text').textContent =
+        `${cleanData.count} image${cleanData.count !== 1 ? 's' : ''} found`;
+      renderImgGrid('cleaner-img-grid', cleanData.tags);
+    }
+
+    refreshPostPreview();
+    toast(`Done — formatted + ${cleanData.count} image${cleanData.count !== 1 ? 's' : ''} appended`, 'success');
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+async function savePost(btn) {
+  if (!activePostId || !blogId) return;
+  const titleEl = document.getElementById('post-editor-title');
+  const title = titleEl.textContent;
+  const content = document.getElementById('post-html').value;
+  const labels = JSON.parse(titleEl.dataset.labels || '[]');
+  if (!confirm(`Save changes to "${title}" on Blogger?`)) return;
+  setBtnLoading(btn, true);
+  try {
+    const data = await fetchJson(`/blogger/post/${activePostId}?blog_id=${blogId}`, 'PUT', {title, content, labels});
+    if (data.success) toast('Post saved successfully!', 'success');
+    else toast('Error: ' + (data.error || 'unknown'), 'error');
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function renderImgGrid(gridId, tags) {
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = '';
+  tags.forEach((tag, i) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = tag;
+    const img = tmp.querySelector('img');
+    if (!img) return;
+    const src = img.getAttribute('src') || '';
+    const el = document.createElement('div');
+    el.className = 'img-thumb';
+    el.innerHTML = `<img src="${src}" alt="img ${i+1}" loading="lazy">
+      <div class="img-thumb-label">Image ${i+1}</div>`;
+    grid.appendChild(el);
+  });
+}
+
+async function writeClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+}
+
+function flashBtn(btn, msg = '✓ Copied!') {
+  if (!btn) return;
+  const orig = btn.innerHTML;
+  btn.innerHTML = msg;
+  setTimeout(() => { btn.innerHTML = orig; }, 1500);
+}
+
+async function copyText(id, btn) {
+  await writeClipboard(document.getElementById(id).value);
+  flashBtn(btn);
+}
+
+// Copy formatter HTML → clipboard AND silently run image extraction in the cleaner
+async function copyFormatterHTML(btn) {
+  const html = document.getElementById('formatter-output').value;
+  if (!html) return;
+  await writeClipboard(html);
+  flashBtn(btn);
+  // Mirror into cleaner and run extraction
+  document.getElementById('cleaner-input').value = html;
+  try {
+    const data = await post('/api/clean', {html});
+    document.getElementById('cleaner-empty').classList.add('hidden');
+    document.getElementById('cleaner-results').classList.remove('hidden');
+    document.getElementById('cleaner-count-text').textContent =
+      `${data.count} image${data.count !== 1 ? 's' : ''} found`;
+    document.getElementById('cleaner-output').value = data.html;
+    renderImgGrid('cleaner-img-grid', data.tags);
+    // Show "Copy Both" only when there are images
+    document.getElementById('copy-both-btn').classList.toggle('hidden', data.count === 0);
+  } catch (_) {}
+}
+
+// Copy formatter HTML + image-cleaner extracted HTML as one combined block
+async function copyBothHTML(btn) {
+  const formatterHtml = document.getElementById('formatter-output').value;
+  const cleanerHtml   = document.getElementById('cleaner-output').value;
+  const combined = cleanerHtml
+    ? formatterHtml + '\n\n<!-- Extracted Images -->\n' + cleanerHtml
+    : formatterHtml;
+  await writeClipboard(combined);
+  flashBtn(btn);
+}
+
+function setBtnLoading(btn, on) {
+  if (!btn) return;
+  if (on) {
+    btn.dataset.orig = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner" style="width:13px;height:13px;border:2px solid rgba(255,255,255,0.4);border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;"></span> Working…';
+    btn.disabled = true;
+  } else {
+    btn.innerHTML = btn.dataset.orig || btn.innerHTML;
+    btn.disabled = false;
+  }
+}
+
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  const colors = {success:'#f0fff4', error:'#fff5f5', info:'#ebf8ff'};
+  const borders = {success:'#9ae6b4', error:'#fcc', info:'#bee3f8'};
+  const texts = {success:'#276749', error:'#c53030', info:'#2b6cb0'};
+  el.style.cssText = `background:${colors[type]};border:1px solid ${borders[type]};color:${texts[type]}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+
+async function get(url) {
+  const r = await fetch(url);
+  return r.json();
+}
+async function post(url, body) {
+  const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  return r.json();
+}
+async function fetchJson(url, method, body) {
+  const r = await fetch(url, {method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  return r.json();
+}
+
+// spinner keyframes (inline so no external CSS needed)
+const style = document.createElement('style');
+style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+
+// Mirror formatter paste into cleaner so images can be extracted without switching tabs
+document.getElementById('formatter-input').addEventListener('paste', function() {
+  setTimeout(() => {
+    document.getElementById('cleaner-input').value = this.value;
+  }, 0);
+});
+
+loadThemes();
+checkBloggerStatus();
+checkGeminiStatus();
+
+const params = new URLSearchParams(location.search);
+if (params.get('tab') === 'blogger') {
+  switchTab('blogger');
+  if (params.get('connected')) toast('Connected to Blogger successfully!', 'success');
+  if (params.get('error')) toast('OAuth error: ' + params.get('error'), 'error');
+  history.replaceState({}, '', '/');
+}
+</script>
+<!-- ═══ GEMINI SETTINGS OVERLAY (global — accessible from any tab) ═══ -->
+<div id="gemini-setup-backdrop" class="hidden" onclick="toggleGeminiSettings()"
+  style="position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;"></div>
+
+<div id="gemini-setup" class="hidden"
+  style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:201;
+         width:min(860px,92vw);padding:24px 28px;background:var(--bg);
+         border:1px solid var(--border);border-radius:10px;
+         box-shadow:0 8px 40px rgba(0,0,0,0.22);">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+    <div style="font-size:0.78rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--primary);">Google Gemini Settings</div>
+    <button class="btn btn-outline btn-sm" onclick="toggleGeminiSettings()" style="padding:3px 10px;">✕ Close</button>
+  </div>
+  <div style="display:grid;grid-template-columns:340px 1fr;gap:28px;align-items:start;">
+
+    <!-- Left: API key -->
+    <div>
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">API Key</div>
+      <p style="font-size:0.82rem;color:var(--body-text);margin-bottom:9px;line-height:1.5;">
+        Free key at <strong>aistudio.google.com</strong> → Get API Key → Create API key. Stored locally only.
+      </p>
+      <div class="input-group">
+        <input type="password" id="gemini-key-input" placeholder="AIza…">
+        <button class="btn btn-primary" onclick="saveGeminiKey(this)">Save Key</button>
+      </div>
+      <div id="gemini-key-status" class="text-muted mt-2" style="font-size:0.78rem;"></div>
+    </div>
+
+    <!-- Right: Model picker -->
+    <div>
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">
+        Model <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.78rem;">— switch if you hit a daily quota limit</span>
+      </div>
+      <div id="gemini-model-btns" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
+      <div id="gemini-model-status" class="text-muted" style="font-size:0.78rem;margin-top:8px;min-height:1.2em;"></div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
