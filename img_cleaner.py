@@ -1,11 +1,33 @@
 import os
+import re
 from bs4 import BeautifulSoup
+
+_FLOAT_RE = re.compile(r'\bfloat\s*:\s*\w+\s*;?\s*', re.IGNORECASE)
+_MARGIN_FLOAT_RE = re.compile(r'\bmargin-(left|right)\s*:\s*[^;]+;?\s*', re.IGNORECASE)
+
+
+def _strip_float_style(tag):
+    """Remove float and float-related margin styles from a tag's style attribute in-place."""
+    for el in [tag] + tag.find_all(True):
+        style = el.get('style', '')
+        if style:
+            cleaned = _FLOAT_RE.sub('', style)
+            cleaned = _MARGIN_FLOAT_RE.sub('', cleaned).strip().strip(';').strip()
+            if cleaned:
+                el['style'] = cleaned
+            else:
+                del el['style']
 
 
 def clean_html_string(html: str) -> list[str]:
-    """Extract <a><img></a> tags from an HTML string. Returns a list of tag strings."""
+    """Extract <a><img></a> tags, stripping float styles. Returns a list of tag strings."""
     soup = BeautifulSoup(html, 'html.parser')
-    return [str(a) for a in soup.find_all('a') if a.find('img')]
+    tags = []
+    for a in soup.find_all('a'):
+        if a.find('img'):
+            _strip_float_style(a)
+            tags.append(str(a))
+    return tags
 
 
 def clean_tags(input_folder='html_input', input_file='dirty_html1.html',

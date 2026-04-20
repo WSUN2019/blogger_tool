@@ -5,6 +5,7 @@ from functools import wraps
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from bs4 import BeautifulSoup
 from blogformat import THEMES, parse_input, render as render_post
+from img_cleaner import clean_html_string as extract_img_tags
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'blogger-tools-local-dev-key')
@@ -61,8 +62,7 @@ BLOGGER_SCOPES = ['https://www.googleapis.com/auth/blogger']
 def api_clean():
     data = request.get_json()
     html = data.get('html', '')
-    soup = BeautifulSoup(html, 'html.parser')
-    tags = [str(a) for a in soup.find_all('a') if a.find('img')]
+    tags = extract_img_tags(html)
     return jsonify({'tags': tags, 'count': len(tags), 'html': '\n'.join(tags)})
 
 
@@ -472,9 +472,9 @@ def blogger_auth():
             CREDENTIALS_FILE, scopes=BLOGGER_SCOPES,
             redirect_uri=url_for('blogger_callback', _external=True)
         )
-        auth_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+        auth_url, state = flow.authorization_url(access_type='offline', prompt='consent')
         session['oauth_state'] = state
-        session['code_verifier'] = flow.code_verifier  # preserve PKCE verifier across requests
+        session['code_verifier'] = getattr(flow, 'code_verifier', None)
         return redirect(auth_url)
     except Exception as e:
         return redirect(f'/?tab=blogger&error={e}')
@@ -489,8 +489,10 @@ def blogger_callback():
             state=session.get('oauth_state'),
             redirect_uri=url_for('blogger_callback', _external=True)
         )
-        flow.fetch_token(authorization_response=request.url,
-                         code_verifier=session.get('code_verifier'))
+        kwargs = {}
+        if session.get('code_verifier'):
+            kwargs['code_verifier'] = session['code_verifier']
+        flow.fetch_token(authorization_response=request.url, **kwargs)
         creds = flow.credentials
         os.makedirs(os.path.dirname(TOKEN_FILE), exist_ok=True)
         with open(TOKEN_FILE, 'w') as f:
@@ -548,7 +550,8 @@ def blogger_posts():
     page_token = request.args.get('page_token') or None
     year = request.args.get('year', '')
     try:
-        params = dict(blogId=blog_id, maxResults=20, orderBy='PUBLISHED',
+        max_results = min(int(request.args.get('max', 20)), 500)
+        params = dict(blogId=blog_id, maxResults=max_results, orderBy='PUBLISHED',
                       status=['LIVE', 'DRAFT'], fetchImages=False)
         if page_token:
             params['pageToken'] = page_token
@@ -600,6 +603,164 @@ def blogger_update_post(post_id):
         return jsonify({'success': True, 'url': r.get('url', '')})
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+
+# ---------------------------------------------------------------------------
+# Cleanup — remove stray Google Fonts <link> tags from all posts
+# ---------------------------------------------------------------------------
+
+_DEFAULT_FONTS_TAG = (
+    '<link href="https://fonts.googleapis.com/css2?'
+    'family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;'
+    'family=Lato:wght@300;400;700&amp;display=swap" rel="stylesheet"></link>'
+)
+
+
+def _build_tag_re(tag: str):
+    """Build a regex that matches the literal tag string with optional trailing </link> and whitespace."""
+    # Strip any trailing </link> the user may have included, then make it optional
+    base = re.sub(r'\s*</link>\s*$', '', tag.strip(), flags=re.IGNORECASE)
+    return re.compile(re.escape(base) + r'\s*(?:</link>)?', re.IGNORECASE)
+
+
+def _strip_custom_tag(html: str, tag: str) -> str:
+    return _build_tag_re(tag).sub('', html).strip()
+
+
+@app.route('/blogger/cleanup/scan', methods=['POST'])
+@login_required
+def blogger_cleanup_scan():
+    svc = _get_service()
+    if not svc:
+        return jsonify({'error': 'Not authenticated'}), 401
+    data = request.get_json() or {}
+    blog_id = data.get('blog_id', '')
+    tag = data.get('tag', _DEFAULT_FONTS_TAG).strip()
+    if not blog_id:
+        return jsonify({'error': 'blog_id required'}), 400
+    try:
+        pattern = _build_tag_re(tag)
+        affected = []
+        page_token = None
+        while True:
+            params = dict(blogId=blog_id, maxResults=50, orderBy='PUBLISHED',
+                          status=['LIVE', 'DRAFT'], fetchImages=False)
+            if page_token:
+                params['pageToken'] = page_token
+            r = svc.posts().list(**params).execute()
+            for p in r.get('items', []):
+                if pattern.search(p.get('content', '')):
+                    affected.append({'id': p['id'], 'title': p['title'],
+                                     'published': p.get('published', ''),
+                                     'url': p.get('url', '')})
+            page_token = r.get('nextPageToken')
+            if not page_token:
+                break
+        return jsonify({'affected': affected, 'count': len(affected)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
+_BT_MARKER_RE = re.compile(r'<!--\s*bt:(\w+)\s*-->', re.IGNORECASE)
+
+
+@app.route('/blogger/bulk/check-themes', methods=['POST'])
+@login_required
+def blogger_bulk_check_themes():
+    """Return the bt: theme marker for each post id, or null if not formatted."""
+    svc = _get_service()
+    if not svc:
+        return jsonify({'error': 'Not authenticated'}), 401
+    data = request.get_json() or {}
+    blog_id = data.get('blog_id', '')
+    post_ids = data.get('post_ids', [])
+    if not blog_id or not post_ids:
+        return jsonify({'error': 'blog_id and post_ids required'}), 400
+    results = {}
+    for post_id in post_ids:
+        try:
+            p = svc.posts().get(blogId=blog_id, postId=post_id).execute()
+            m = _BT_MARKER_RE.search(p.get('content', ''))
+            results[post_id] = m.group(1) if m else None
+        except Exception:
+            results[post_id] = None
+    return jsonify({'themes': results})
+
+
+@app.route('/blogger/bulk/reformat-one', methods=['POST'])
+@login_required
+def blogger_bulk_reformat_one():
+    """Fetch a single post, smart-format it, append extracted images, push back."""
+    svc = _get_service()
+    if not svc:
+        return jsonify({'error': 'Not authenticated'}), 401
+    data = request.get_json() or {}
+    blog_id = data.get('blog_id', '')
+    post_id = data.get('post_id', '')
+    theme_name = data.get('theme', 'navy_gold')
+    if not blog_id or not post_id:
+        return jsonify({'error': 'blog_id and post_id required'}), 400
+    api_key = _get_gemini_key()
+    if not api_key:
+        return jsonify({'error': 'no_key'}), 400
+    try:
+        p = svc.posts().get(blogId=blog_id, postId=post_id).execute()
+        original_html = p.get('content', '')
+
+        plain = _html_to_plain(original_html)
+        plain = _auto_inject_title(plain)
+
+        model_id = _get_gemini_model()
+        from google import genai
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(model=model_id, contents=GEMINI_PROMPT + plain)
+        structured = response.text.strip()
+        if structured.startswith('```'):
+            lines = structured.splitlines()
+            start = 1
+            end = len(lines) - 1 if lines[-1].strip() == '```' else len(lines)
+            structured = '\n'.join(lines[start:end]).strip()
+
+        theme = THEMES.get(theme_name, THEMES['navy_gold'])
+        post_obj = parse_input(structured)
+        formatted_html = render_post(post_obj, theme)
+
+        img_tags = extract_img_tags(original_html)
+        if img_tags:
+            formatted_html += '\n' + '\n'.join(img_tags)
+
+        body = {'id': post_id, 'title': p['title'], 'content': formatted_html}
+        if 'labels' in p:
+            body['labels'] = p['labels']
+        svc.posts().update(blogId=blog_id, postId=post_id, body=body).execute()
+        return jsonify({'status': 'done', 'title': p['title']})
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)})
+
+
+@app.route('/blogger/cleanup/fix-one', methods=['POST'])
+@login_required
+def blogger_cleanup_fix_one():
+    """Fix a single post — called one at a time by the frontend with a delay to avoid QPM limits."""
+    svc = _get_service()
+    if not svc:
+        return jsonify({'error': 'Not authenticated'}), 401
+    data = request.get_json() or {}
+    blog_id = data.get('blog_id', '')
+    post_id = data.get('post_id', '')
+    tag = data.get('tag', _DEFAULT_FONTS_TAG).strip()
+    if not blog_id or not post_id:
+        return jsonify({'error': 'blog_id and post_id required'}), 400
+    try:
+        p = svc.posts().get(blogId=blog_id, postId=post_id).execute()
+        cleaned = _strip_custom_tag(p.get('content', ''), tag)
+        body = {'id': post_id, 'title': p['title'], 'content': cleaned}
+        if 'labels' in p:
+            body['labels'] = p['labels']
+        svc.posts().update(blogId=blog_id, postId=post_id, body=body).execute()
+        return jsonify({'status': 'fixed', 'title': p['title']})
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)})
 
 
 # ---------------------------------------------------------------------------

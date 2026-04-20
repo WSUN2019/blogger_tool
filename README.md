@@ -1,4 +1,4 @@
-# Blogger Tools
+# My Blogging Helper
 
 A local web app for formatting and managing blog posts on Blogger.com.  
 Built for **ModernSimpleLiving.com** — navy/gold theme, inline-styled HTML, Blogger-compatible output.
@@ -7,12 +7,28 @@ Built for **ModernSimpleLiving.com** — navy/gold theme, inline-styled HTML, Bl
 
 ## Features
 
-| Tab | What it does |
-|-----|-------------|
-| **Image Extractor** | Paste raw Blogger HTML → pulls out all `<a><img></a>` image blocks → copy back to Blogger |
-| **Blog Formatter** | Paste plain text or markdown → choose a color theme → get fully styled Blogger-ready HTML with preview |
+### Blog Editor (tab 1)
+OAuth connection to the Blogger API — browse all posts, pull HTML, and push changes back directly.
+
+### Utilities (tab 2)
+
+**Single Post tools:**
+
+| Tool | What it does |
+|------|-------------|
+| **Blog Formatter** | Paste plain text or markdown → choose a color theme → get fully styled Blogger-ready HTML with live preview |
 | **Smart Format (AI)** | Sends your text to Google Gemini → auto-detects sections, generates KPI stats, structures lists/tables → renders formatted post |
-| **Blogger Connect** | OAuth connection to Blogger API → browse posts, pull HTML, extract images, push changes back |
+| **Image Extractor** | Paste raw Blogger HTML → pulls out all `<a><img></a>` image blocks, strips float styles → copy back to Blogger |
+
+**Bulk Post tools:**
+
+| Tool | What it does |
+|------|-------------|
+| **Link Cleanup** | Scan all posts for a custom HTML tag (e.g. a Google Fonts `<link>`) and remove it in bulk, 25 at a time with rate-limit protection |
+| **Bulk Reformat + Images** | Select up to 10 posts at a time → AI reformats each one + extracts/cleans images → pushes updated HTML back to Blogger. Shows ✅/🔄/○ icons indicating whether each post already has the current theme applied |
+
+### About (tab 3)
+App overview, feature cards, formatter syntax reference, and built-with info.
 
 ---
 
@@ -40,7 +56,7 @@ pip install flask beautifulsoup4 google-genai google-api-python-client google-au
 | `flask` | Web server |
 | `beautifulsoup4` | HTML parsing for the image extractor |
 | `google-genai` | Google Gemini AI SDK (Smart Format feature) |
-| `google-api-python-client` | Blogger API v3 (Blogger Connect feature) |
+| `google-api-python-client` | Blogger API v3 (Blog Editor + bulk tools) |
 | `google-auth-oauthlib` | OAuth2 login flow for Blogger |
 | `google-auth-httplib2` | HTTP transport for Google auth |
 
@@ -82,7 +98,7 @@ The Smart Format button uses **Google Gemini 2.5 Flash** to auto-structure your 
 ### Step 2 — Save the key (two options)
 
 **Option A — In the web app:**
-1. Open the **Blog Formatter** tab
+1. Open the **Utilities** tab → **Single** → **Blog Formatter**
 2. Click the **⚙** gear icon (top right of the button row)
 3. Paste your key → click **Save Key**
 
@@ -96,7 +112,7 @@ The key is stored in `config/gemini_key.txt` and never leaves your machine excep
 ### Gemini model
 The active model is selected inside the app — no code editing needed.
 
-1. Open the **Blog Formatter** tab
+1. Open **Utilities** → **Blog Formatter**
 2. Click the **⚙** gear icon
 3. Under **Model**, click any model button to switch — the choice is saved immediately to `config/gemini_model.txt`
 
@@ -106,8 +122,8 @@ Available models (all free tier):
 |-------|-------|
 | Gemini 2.5 Flash | Default — best quality |
 | Gemini 2.5 Flash Lite | Faster, lower quota usage |
-| Gemini 3 Flash | Latest generation (preview) |
-| Gemini 3.1 Flash Lite | Latest preview, high quota |
+| Gemini 3 Flash (preview) | Latest generation |
+| Gemini 3.1 Flash Lite (preview) | Latest preview, high quota |
 
 > If you see a **429 RESOURCE_EXHAUSTED** error, switch to a different model via the ⚙ panel — each model has its own independent daily quota.
 
@@ -176,15 +192,15 @@ If neither env vars nor `config/auth.txt` are present, the app falls back to bui
 
 ---
 
-## Optional Setup — Blogger Connect (OAuth)
+## Optional Setup — Blog Editor (OAuth)
 
-This tab lets you pull and push post HTML directly from your Blogger account.  
+The Blog Editor tab lets you pull and push post HTML directly from your Blogger account.  
 It requires a one-time Google Cloud setup.
 
 ### Step 1 — Create a Google Cloud project
 
 1. Go to **https://console.cloud.google.com**
-2. Create a new project (e.g. "Blogger Tools")
+2. Create a new project (e.g. "My Blogging Helper")
 3. In the search bar, find **Blogger API v3** and enable it
 
 ### Step 2 — Create OAuth credentials
@@ -209,7 +225,7 @@ blogger_tool/
 
 ### Step 4 — Connect in the app
 
-1. Open the **Blogger Connect** tab
+1. Open the **Blog Editor** tab
 2. Click **Connect with Google**
 3. Authorize in the browser — you'll be redirected back automatically
 4. Enter your blog URL to load posts
@@ -227,11 +243,14 @@ blogger_tool/
 ├── requirements.txt        # Python dependencies
 ├── sample.txt              # Sample post for testing the formatter
 ├── templates/
-│   └── index.html          # Full web app UI (3 tabs)
+│   ├── index.html          # Full web app UI (3 tabs: Blog Editor, Utilities, About)
+│   └── login.html          # Sign-in page
 ├── html_input/             # Drop HTML files here for CLI image extraction
 ├── html_output/            # CLI extraction results written here
 └── config/
     ├── gemini_key.txt       # Your Gemini API key (gitignored)
+    ├── gemini_model.txt     # Selected Gemini model (gitignored)
+    ├── auth.txt             # Username/password for local use (gitignored)
     ├── credentials.json     # Google OAuth client secret (gitignored)
     └── token.json           # Stored OAuth token (gitignored, auto-created)
 ```
@@ -280,6 +299,8 @@ FOOTER: Thanks for reading — ModernSimpleLiving.com
 | `forest` | Deep Green / Sage |
 | `slate` | Charcoal / Copper |
 
+Each formatted post embeds a hidden `<!-- bt:{theme_key} -->` marker so the Bulk Reformat tool can detect which posts already use the current theme.
+
 ---
 
 ## Image Extractor — CLI usage
@@ -297,6 +318,12 @@ Output is saved to `html_output/cleaned_images.html`.
 
 ---
 
+## Bulk Tools — Rate Limiting
+
+The Blogger API has a quota of ~60 requests per minute. The bulk tools automatically add a delay between posts (1.5 s for Link Cleanup, 3 s for Bulk Reformat) to stay within limits. If you have a large number of posts, expect the operation to take several minutes. Both tools show a real-time progress bar and have a **✕ Cancel** button to stop mid-run.
+
+---
+
 ## Troubleshooting
 
 **App won't start**
@@ -308,10 +335,13 @@ Output is saved to `html_output/cleaned_images.html`.
 
 **Gemini 429 error**
 - Your key hit the free quota for the selected model
-- In `app.py` change the model to `gemini-2.5-flash` or `gemini-1.5-flash`
+- Switch to a different model via the ⚙ panel — each model has its own independent quota
 
-**Blogger Connect — "credentials.json not found"**
+**Blog Editor — "credentials.json not found"**
 - Complete the Google Cloud OAuth setup above and place the file in `config/`
 
-**Blogger Connect — OAuth error after callback**
+**Blog Editor — OAuth error after callback**
 - Make sure `http://localhost:5000/blogger/callback` is listed as an authorized redirect URI in your Google Cloud credentials
+
+**Bulk tools — 429 rate limit error mid-run**
+- Click Cancel, wait a minute, then resume from where you left off

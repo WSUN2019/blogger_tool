@@ -1,5 +1,5 @@
 #!/bin/bash
-# Blogger Tools — click to launch
+# My Blogging Helper — click to launch
 
 cd "$(dirname "$0")"
 
@@ -7,3 +7,6 @@ cd "$(dirname "$0")"
 (sleep 2 && xdg-open http://localhost:5000) &
 
 python3 app.py
+echo ""
+echo "--- App exited (code $?) ---"
+read -rp "Press Enter to close..."

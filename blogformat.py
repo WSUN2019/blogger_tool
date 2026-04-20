@@ -54,6 +54,7 @@ from typing import Optional
 
 @dataclass(frozen=True)
 class Theme:
+    key: str
     name: str
     primary: str        # "navy" — headers, headings, strong text
     accent: str         # "gold" — eyebrows, arrows, callout border, stat numbers
@@ -67,6 +68,7 @@ class Theme:
 
 THEMES: dict[str, Theme] = {
     "navy_gold": Theme(
+        key="navy_gold",
         name="Navy / Gold (default)",
         primary="#1a2640",
         accent="#c9a84c",
@@ -78,8 +80,9 @@ THEMES: dict[str, Theme] = {
         body_text="#3a3a3a",
     ),
     "woodsy": Theme(
+        key="woodsy",
         name="Woodsy (forest green / amber)",
-        primary="#2d3f２e".replace("２", "2"),  # safeguard against accidental unicode
+        primary="#2d3f２e".replace("２", "2"),
         accent="#b8893a",
         accent_light="#e4c78a",
         bg="#f8f5ef",
@@ -89,6 +92,7 @@ THEMES: dict[str, Theme] = {
         body_text="#3a3a3a",
     ),
     "ocean": Theme(
+        key="ocean",
         name="Ocean (deep blue / seafoam)",
         primary="#12304a",
         accent="#3a9ea5",
@@ -100,6 +104,7 @@ THEMES: dict[str, Theme] = {
         body_text="#2f3a42",
     ),
     "brick": Theme(
+        key="brick",
         name="Brick (rust red / amber)",
         primary="#6e2b1f",
         accent="#d4892a",
@@ -111,6 +116,7 @@ THEMES: dict[str, Theme] = {
         body_text="#3a2f2a",
     ),
     "purple": Theme(
+        key="purple",
         name="Purple / Gold",
         primary="#3d2c5e",
         accent="#c9a84c",
@@ -122,6 +128,7 @@ THEMES: dict[str, Theme] = {
         body_text="#3a3340",
     ),
     "forest": Theme(
+        key="forest",
         name="Forest (deep green / sage)",
         primary="#1f3d2f",
         accent="#7a9b5c",
@@ -133,6 +140,7 @@ THEMES: dict[str, Theme] = {
         body_text="#2f3a34",
     ),
     "slate": Theme(
+        key="slate",
         name="Slate (charcoal / copper)",
         primary="#2b2f36",
         accent="#c87a4a",
@@ -145,18 +153,6 @@ THEMES: dict[str, Theme] = {
     ),
 }
 
-# Fix the woodsy typo proactively (from copy-paste safeguard above)
-THEMES["woodsy"] = Theme(
-    name="Woodsy (forest green / amber)",
-    primary="#2d3f2e",
-    accent="#b8893a",
-    accent_light="#e4c78a",
-    bg="#f8f5ef",
-    warm="#ece5d6",
-    border="#d4c9b3",
-    muted="#6b6257",
-    body_text="#3a3a3a",
-)
 
 
 # ---------------------------------------------------------------------------
@@ -438,6 +434,9 @@ def inline_format(text: str, theme: Theme) -> str:
 
 def render(post: Post, theme: Theme) -> str:
     out = []
+
+    # Embedded marker so bulk tools can detect which theme was applied
+    out.append(f'<!-- bt:{theme.key} -->')
 
     # ---- Header ----
     out.append(render_header(post, theme))

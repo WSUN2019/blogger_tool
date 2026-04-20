@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blogger Tools</title>
+<title>My Blogging Helper</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -360,16 +360,23 @@ code {
 <header class="app-header">
   <div class="app-logo">
     <div class="logo-icon">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M2 4h12M2 8h8M2 12h10" stroke="#1a2640" stroke-width="2" stroke-linecap="round"/>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <!-- open book pages -->
+        <path d="M12 5C10 3.5 7 3 4 3.5V17.5C7 17 10 17.5 12 19V5Z" fill="#1a2640"/>
+        <path d="M12 5C14 3.5 17 3 20 3.5V17.5C17 17 14 17.5 12 19V5Z" fill="#1a2640" opacity="0.65"/>
+        <!-- spine -->
+        <line x1="12" y1="5" x2="12" y2="19" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- sparkle star -->
+        <path d="M19 1l.5 1.5L21 3l-1.5.5L19 5l-.5-1.5L17 3l1.5-.5Z" fill="#c9a84c"/>
+        <!-- small heart on left page -->
+        <path d="M7 9.5C7 8.7 7.7 8 8.5 8S10 8.7 10 9.5C10 11 8.5 12 8.5 12S7 11 7 9.5Z" fill="#c9a84c" opacity="0.85"/>
       </svg>
     </div>
-    <span class="app-logo-text">Blogger<span> Tools</span></span>
+    <span class="app-logo-text">My Blogging<span> Helper</span></span>
   </div>
   <nav class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('formatter')">Blog Formatter</button>
-    <button class="tab-btn" onclick="switchTab('cleaner')">Image Cleaner</button>
-    <button class="tab-btn" onclick="switchTab('blogger')" id="blogger-tab-btn">Blogger Connect</button>
+    <button class="tab-btn active" onclick="switchTab('blogger')" id="blogger-tab-btn">Blog Editor</button>
+    <button class="tab-btn" onclick="switchTab('cleanup')">Utilities</button>
     <button class="tab-btn" onclick="switchTab('about')">About</button>
   </nav>
   <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
@@ -381,153 +388,13 @@ code {
 <!-- ═══ MAIN ═══ -->
 <main class="main">
 
-<!-- ─────────────────────────────────────────
-     TAB 1 · IMAGE CLEANER
-───────────────────────────────────────────── -->
-<div id="tab-cleaner" class="tab-pane">
-  <h1 class="page-title">Image Extractor</h1>
-  <p class="page-desc">Paste any Blogger HTML to pull out all <code>&lt;a&gt;&lt;img&gt;&lt;/a&gt;</code> image blocks — clean and ready to copy back.</p>
-
-  <div class="cleaner-grid">
-
-    <!-- Input -->
-    <div class="card" style="display:flex;flex-direction:column;gap:10px;">
-      <label>Paste HTML Here</label>
-      <textarea id="cleaner-input" rows="18"
-        placeholder="Paste your Blogger post HTML here...&#10;&#10;The tool will extract every &lt;a href=&quot;...&quot;&gt;&lt;img ...&gt;&lt;/a&gt; image block."></textarea>
-      <div class="flex gap-2 mt-2">
-        <button class="btn btn-primary" onclick="cleanImages(this)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          Extract Images
-        </button>
-        <button class="btn btn-outline" onclick="clearCleaner()">Clear</button>
-      </div>
-    </div>
-
-    <!-- Output -->
-    <div class="card">
-      <div id="cleaner-empty" class="empty-state">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <path d="M3 9l4-4 4 4 4-4 4 4"/>
-          <circle cx="8.5" cy="14.5" r="1.5"/>
-        </svg>
-        <span>Paste HTML on the left and click<br><strong>Extract Images</strong></span>
-      </div>
-      <div id="cleaner-results" class="hidden">
-        <div class="flex gap-2 mb-2" style="align-items:center;justify-content:space-between;flex-wrap:wrap;">
-          <span id="cleaner-badge" class="badge badge-success">
-            <span class="bdot bdot-success"></span>
-            <span id="cleaner-count-text">0 images found</span>
-          </span>
-          <button class="btn btn-accent btn-sm" onclick="copyText('cleaner-output', this)">⧉ Copy All HTML</button>
-        </div>
-        <div id="cleaner-img-grid" class="img-preview-grid"></div>
-        <hr class="divider">
-        <div class="output-row">
-          <label style="margin:0;">Extracted Image HTML</label>
-        </div>
-        <textarea id="cleaner-output" rows="9" readonly></textarea>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-
-<!-- ─────────────────────────────────────────
-     TAB 2 · IMAGE CLEANER
-───────────────────────────────────────────── -->
-<div id="tab-formatter" class="tab-pane active">
-  <h1 class="page-title">Blog Formatter</h1>
-  <p class="page-desc">Paste plain text or light markdown — choose a color theme and get beautiful Blogger-ready HTML with fully inlined styles.</p>
-
-  <!-- Theme picker -->
-  <div class="card mb-2" style="margin-bottom:16px;">
-    <label>Color Theme</label>
-    <div id="theme-row" class="theme-row"></div>
-  </div>
-
-  <!-- Split: input | preview -->
-  <div class="formatter-split">
-    <div class="formatter-left">
-      <div class="card" style="flex:1;display:flex;flex-direction:column;gap:10px;">
-        <div class="flex gap-2" style="align-items:center;justify-content:space-between;">
-          <label style="margin:0;">Your Text / Markdown</label>
-          <button class="btn btn-outline btn-sm" onclick="loadSample()">Load Sample</button>
-        </div>
-        <textarea id="formatter-input" style="flex:1;min-height:340px;"
-          placeholder="TITLE: My Post Title&#10;SUBTITLE: Optional italic subtitle&#10;EYEBROW: Feature&#10;STATS: 5 Items | 3 Days | $200 Total&#10;&#10;# Section Heading&#10;&#10;Regular paragraph text here.&#10;&#10;- **Item name** — description&#10;&#10;&gt; This is a callout block."></textarea>
-        <div class="flex gap-2" style="flex-wrap:wrap;">
-          <button id="smart-btn" class="btn btn-accent" onclick="smartFormat(this)" title="Uses Google Gemini AI to auto-structure your text, detect sections, and generate KPI stats">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-            Smart Format (AI)
-          </button>
-          <button class="btn btn-primary" onclick="formatPost(this)">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            Format Post
-          </button>
-          <button class="btn btn-outline" onclick="clearFormatter()">Clear</button>
-          <button class="btn btn-outline btn-sm btn-icon" onclick="toggleGeminiSettings()" title="Gemini API key settings" style="margin-left:auto;">⚙</button>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="preview-wrap">
-      <div id="preview-empty" class="preview-empty">
-        <div>
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="display:block;margin:0 auto 10px;opacity:0.35"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          Preview appears here after formatting
-        </div>
-      </div>
-      <iframe id="formatter-preview" class="preview-iframe hidden" title="Post preview"></iframe>
-    </div>
-  </div>
-
-  <!-- HTML stripped notice -->
-  <div id="html-stripped-notice" class="alert alert-info hidden" style="margin-top:16px;">
-    <strong>HTML input detected.</strong> Tags were automatically stripped to plain text before formatting.
-    For best results, paste plain text or <a href="#" onclick="showMarkdownHelp();return false;" style="color:inherit;font-weight:700;">light markdown</a> — not existing HTML.
-  </div>
-
-  <!-- 2-col: HTML output | AI review -->
-  <div id="bottom-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start;">
-
-    <!-- HTML output (col 1) -->
-    <div id="formatter-output-card" class="card" style="grid-column:1/-1;">
-      <div class="output-row">
-        <label style="margin:0;">Formatted HTML — paste this into Blogger's HTML editor</label>
-        <div class="flex gap-2">
-          <button class="btn btn-accent btn-sm" onclick="copyFormatterHTML(this)" title="Copy HTML and auto-extract images into Image Cleaner">⧉ Copy HTML</button>
-          <button id="copy-both-btn" class="btn btn-outline btn-sm hidden" onclick="copyBothHTML(this)" title="Copy formatted HTML + extracted image HTML combined">⧉ Copy Both</button>
-        </div>
-      </div>
-      <textarea id="formatter-output" rows="10" readonly
-        placeholder="Formatted HTML will appear here after you click Format Post..."></textarea>
-    </div>
-
-    <!-- AI structured text review (col 2) -->
-    <div id="ai-review-card" class="card hidden">
-      <div class="output-row">
-        <label style="margin:0;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px;color:var(--accent)"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-          AI Markdown — review &amp; edit, then re-render
-        </label>
-        <button class="btn btn-primary btn-sm" onclick="formatFromAIReview(this)">↻ Re-render</button>
-      </div>
-      <textarea id="ai-structured-text" rows="10" style="font-family:monospace;font-size:0.81rem;"></textarea>
-    </div>
-
-  </div>
-</div>
 
 
 <!-- ─────────────────────────────────────────
      TAB 3 · BLOGGER CONNECT
 ───────────────────────────────────────────── -->
-<div id="tab-blogger" class="tab-pane">
-  <h1 class="page-title">Blogger Connect</h1>
+<div id="tab-blogger" class="tab-pane active">
+  <h1 class="page-title">Blog Editor</h1>
   <p class="page-desc">Connect to your Blogger account via Google OAuth to pull post HTML, extract images, apply themes, and push changes back — all without leaving this tool.</p>
 
   <!-- ── NOT CONNECTED ── -->
@@ -678,16 +545,360 @@ code {
 
 
 <!-- ─────────────────────────────────────────
-     TAB 4 · ABOUT
+     TAB 2 · UTILITIES
+───────────────────────────────────────────── -->
+<div id="tab-cleanup" class="tab-pane">
+  <div style="max-width:860px;margin:0 auto;">
+
+    <!-- Page title -->
+    <div style="padding:24px 0 16px;">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Utilities</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--primary);">Post Tools</h2>
+    </div>
+
+    <!-- Single / Bulk mode toggle -->
+    <div style="display:flex;gap:0;margin-bottom:24px;border:2px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content;">
+      <button id="util-mode-btn-single" onclick="showUtilMode('single')"
+        style="padding:9px 28px;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:var(--primary);color:white;cursor:pointer;">
+        Single Post
+      </button>
+      <button id="util-mode-btn-bulk" onclick="showUtilMode('bulk')"
+        style="padding:9px 28px;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:white;color:var(--muted);cursor:pointer;">
+        Bulk Operations
+      </button>
+    </div>
+
+    <!-- ══ SINGLE MODE ══ -->
+    <div id="util-mode-single">
+
+      <!-- Single sub-nav cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+        <div id="util-nav-formatter" onclick="showUtil('formatter')"
+          style="cursor:pointer;border:2px solid var(--accent);background:var(--warm);border-radius:8px;padding:16px 20px;transition:box-shadow 0.15s;"
+          onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow=''">
+          <div style="font-size:1.3rem;margin-bottom:6px;">✍️</div>
+          <div style="font-weight:700;font-size:0.95rem;color:var(--primary);margin-bottom:4px;">Blog Formatter</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.4;">Paste text or markdown — get Blogger-ready themed HTML with AI smart formatting</div>
+        </div>
+        <div id="util-nav-cleaner" onclick="showUtil('cleaner')"
+          style="cursor:pointer;border:2px solid var(--border);background:white;border-radius:8px;padding:16px 20px;transition:box-shadow 0.15s;"
+          onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow=''">
+          <div style="font-size:1.3rem;margin-bottom:6px;">🖼️</div>
+          <div style="font-weight:700;font-size:0.95rem;color:var(--primary);margin-bottom:4px;">Image Cleaner</div>
+          <div style="font-size:0.78rem;color:var(--muted);line-height:1.4;">Extract <code>&lt;a&gt;&lt;img&gt;</code> blocks from HTML and strip float styles</div>
+        </div>
+      </div>
+
+      <!-- Blog Formatter section -->
+      <div id="util-section-formatter" style="display:none;">
+        <h1 class="page-title">Blog Formatter</h1>
+        <p class="page-desc">Paste plain text or light markdown — choose a color theme and get beautiful Blogger-ready HTML with fully inlined styles.</p>
+        <div class="card mb-2" style="margin-bottom:16px;">
+          <label>Color Theme</label>
+          <div id="theme-row" class="theme-row"></div>
+        </div>
+        <div class="formatter-split">
+          <div class="formatter-left">
+            <div class="card" style="flex:1;display:flex;flex-direction:column;gap:10px;">
+              <div class="flex gap-2" style="align-items:center;justify-content:space-between;">
+                <label style="margin:0;">Your Text / Markdown</label>
+                <button class="btn btn-outline btn-sm" onclick="loadSample()">Load Sample</button>
+              </div>
+              <textarea id="formatter-input" style="flex:1;min-height:340px;"
+                placeholder="TITLE: My Post Title&#10;SUBTITLE: Optional italic subtitle&#10;EYEBROW: Feature&#10;STATS: 5 Items | 3 Days | $200 Total&#10;&#10;# Section Heading&#10;&#10;Regular paragraph text here.&#10;&#10;- **Item name** — description&#10;&#10;&gt; This is a callout block."></textarea>
+              <div class="flex gap-2" style="flex-wrap:wrap;">
+                <button id="smart-btn" class="btn btn-accent" onclick="smartFormat(this)" title="Uses Google Gemini AI to auto-structure your text, detect sections, and generate KPI stats">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+                  Smart Format (AI)
+                </button>
+                <button class="btn btn-primary" onclick="formatPost(this)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                  Format Post
+                </button>
+                <button class="btn btn-outline" onclick="clearFormatter()">Clear</button>
+                <button class="btn btn-outline btn-sm btn-icon" onclick="toggleGeminiSettings()" title="Gemini API key settings" style="margin-left:auto;">⚙</button>
+              </div>
+            </div>
+          </div>
+          <div class="preview-wrap">
+            <div id="preview-empty" class="preview-empty">
+              <div>
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="display:block;margin:0 auto 10px;opacity:0.35"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                Preview appears here after formatting
+              </div>
+            </div>
+            <iframe id="formatter-preview" class="preview-iframe hidden" title="Post preview"></iframe>
+          </div>
+        </div>
+        <div id="html-stripped-notice" class="alert alert-info hidden" style="margin-top:16px;">
+          <strong>HTML input detected.</strong> Tags were automatically stripped to plain text before formatting.
+        </div>
+        <div id="bottom-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start;">
+          <div id="formatter-output-card" class="card" style="grid-column:1/-1;">
+            <div class="output-row">
+              <label style="margin:0;">Formatted HTML — paste this into Blogger's HTML editor</label>
+              <div class="flex gap-2">
+                <button class="btn btn-accent btn-sm" onclick="copyFormatterHTML(this)" title="Copy HTML and auto-extract images into Image Cleaner">⧉ Copy HTML</button>
+                <button id="copy-both-btn" class="btn btn-outline btn-sm hidden" onclick="copyBothHTML(this)" title="Copy formatted HTML + extracted image HTML combined">⧉ Copy Both</button>
+              </div>
+            </div>
+            <textarea id="formatter-output" rows="10" readonly placeholder="Formatted HTML will appear here after you click Format Post..."></textarea>
+          </div>
+          <div id="ai-review-card" class="card hidden">
+            <div class="output-row">
+              <label style="margin:0;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px;color:var(--accent)"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+                AI Markdown — review &amp; edit, then re-render
+              </label>
+              <button class="btn btn-primary btn-sm" onclick="formatFromAIReview(this)">↻ Re-render</button>
+            </div>
+            <textarea id="ai-structured-text" rows="10" style="font-family:monospace;font-size:0.81rem;"></textarea>
+          </div>
+        </div>
+      </div><!-- /util-section-formatter -->
+
+      <!-- Image Cleaner section -->
+      <div id="util-section-cleaner" style="display:none;">
+        <h1 class="page-title">Image Cleaner</h1>
+        <p class="page-desc">Paste any Blogger HTML to pull out all <code>&lt;a&gt;&lt;img&gt;&lt;/a&gt;</code> image blocks — float styles stripped, clean and ready to copy back.</p>
+        <div class="cleaner-grid">
+          <div class="card" style="display:flex;flex-direction:column;gap:10px;">
+            <label>Paste HTML Here</label>
+            <textarea id="cleaner-input" rows="18"
+              placeholder="Paste your Blogger post HTML here...&#10;&#10;The tool will extract every &lt;a href=&quot;...&quot;&gt;&lt;img ...&gt;&lt;/a&gt; image block."></textarea>
+            <div class="flex gap-2 mt-2">
+              <button class="btn btn-primary" onclick="cleanImages(this)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                Extract Images
+              </button>
+              <button class="btn btn-outline" onclick="clearCleaner()">Clear</button>
+            </div>
+          </div>
+          <div class="card">
+            <div id="cleaner-empty" class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9l4-4 4 4 4-4 4 4"/>
+                <circle cx="8.5" cy="14.5" r="1.5"/>
+              </svg>
+              <span>Paste HTML on the left and click<br><strong>Extract Images</strong></span>
+            </div>
+            <div id="cleaner-results" class="hidden">
+              <div class="flex gap-2 mb-2" style="align-items:center;justify-content:space-between;flex-wrap:wrap;">
+                <span id="cleaner-badge" class="badge badge-success">
+                  <span class="bdot bdot-success"></span>
+                  <span id="cleaner-count-text">0 images found</span>
+                </span>
+                <button class="btn btn-accent btn-sm" onclick="copyText('cleaner-output', this)">⧉ Copy All HTML</button>
+              </div>
+              <div id="cleaner-img-grid" class="img-preview-grid"></div>
+              <hr class="divider">
+              <div class="output-row">
+                <label style="margin:0;">Extracted Image HTML</label>
+              </div>
+              <textarea id="cleaner-output" rows="9" readonly></textarea>
+            </div>
+          </div>
+        </div>
+      </div><!-- /util-section-cleaner -->
+
+    </div><!-- /util-mode-single -->
+
+    <!-- ══ BULK MODE ══ -->
+    <div id="util-mode-bulk" style="display:none;">
+
+      <!-- Bulk sub-nav cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;">
+      <div id="util-nav-link-cleanup" onclick="showUtil('link-cleanup')"
+        style="cursor:pointer;border:2px solid var(--accent);background:var(--warm);border-radius:8px;padding:16px 20px;transition:box-shadow 0.15s;"
+        onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow=''">
+        <div style="font-size:1.3rem;margin-bottom:6px;">🔗</div>
+        <div style="font-weight:700;font-size:0.95rem;color:var(--primary);margin-bottom:4px;">Link Cleanup</div>
+        <div style="font-size:0.78rem;color:var(--muted);line-height:1.4;">Remove stray Google Fonts <code>&lt;link&gt;</code> tags from all posts</div>
+      </div>
+      <div id="util-nav-bulk-reformat" onclick="showUtil('bulk-reformat')"
+        style="cursor:pointer;border:2px solid var(--border);background:white;border-radius:8px;padding:16px 20px;transition:box-shadow 0.15s;"
+        onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow=''">
+        <div style="font-size:1.3rem;margin-bottom:6px;">✨</div>
+        <div style="font-weight:700;font-size:0.95rem;color:var(--primary);margin-bottom:4px;">Bulk Reformat + Images</div>
+        <div style="font-size:0.78rem;color:var(--muted);line-height:1.4;">Mass apply AI formatting and image cleanup to posts — 10 at a time</div>
+      </div>
+    </div>
+
+    <!-- ── Section: Link Cleanup ── -->
+    <div id="util-section-link-cleanup" class="card" style="margin-bottom:20px;">
+      <div class="card-header" style="border-bottom:2px solid var(--accent-light);">
+        <span class="card-title">Link Cleanup</span>
+        <span style="font-size:0.75rem;color:var(--muted);margin-left:10px;">Scan all posts and remove stray Google Fonts <code>&lt;link&gt;</code> tags</span>
+      </div>
+      <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
+
+        <div style="background:#fdf6e3;border:1px solid #e8d5a3;border-left:4px solid var(--accent);border-radius:6px;padding:14px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);">Tag / text to remove</div>
+            <button class="btn btn-sm" onclick="cleanupResetTag()"
+              style="background:transparent;border:1px solid #e8d5a3;color:#5a4a1a;font-size:0.7rem;padding:2px 8px;">Reset default</button>
+          </div>
+          <textarea id="cleanup-tag-input" rows="3"
+            style="width:100%;font-family:monospace;font-size:0.72rem;color:#5a4a1a;background:#fffdf5;border:1px solid #e8d5a3;border-radius:4px;padding:8px;resize:vertical;line-height:1.6;word-break:break-all;"
+          ><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Lato:wght@300;400;700&amp;display=swap" rel="stylesheet"></link></textarea>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;">Edit to match any tag or text you want stripped. Also matches without trailing <code>&lt;/link&gt;</code>.</div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input id="cleanup-blog-url" type="text" class="input" placeholder="https://yourblog.here.com" style="flex:1;" />
+          <button class="btn btn-primary" onclick="cleanupScan()">🔍 Scan All Posts</button>
+        </div>
+
+        <div id="cleanup-status" style="font-size:0.83rem;color:var(--muted);min-height:20px;"></div>
+
+        <div style="background:#f5f0fa;border:1px solid #d4b8f0;border-left:4px solid #9b6dca;border-radius:6px;padding:12px 16px;font-size:0.8rem;color:#4a3a5a;line-height:1.5;">
+          <strong>Note on speed:</strong> Blogger API limits updates per minute. Processes <strong>one post every 1.5 seconds</strong> — 25 posts ≈ 38s, 200 posts ≈ 5 min. Use <em>Fix Next 25</em> to batch.
+        </div>
+
+        <div id="cleanup-results" class="hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <span id="cleanup-count-label" style="font-weight:700;font-size:0.9rem;"></span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-sm" id="cleanup-batch-btn"
+                style="background:var(--warm);border:1px solid var(--border);color:var(--primary);"
+                onclick="cleanupFixBatch(25)">Fix Next 25</button>
+              <button class="btn btn-accent btn-sm" id="cleanup-fix-btn" onclick="cleanupFixBatch(Infinity)">✓ Fix All</button>
+            </div>
+          </div>
+          <div id="cleanup-progress" class="hidden" style="margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:var(--muted);margin-bottom:4px;">
+              <span id="cleanup-progress-label">Fixing…</span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span id="cleanup-progress-pct"></span>
+                <button class="btn btn-sm" id="cleanup-cancel-btn" onclick="cleanupCancel()"
+                  style="background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;padding:2px 10px;">✕ Cancel</button>
+              </div>
+            </div>
+            <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden;">
+              <div id="cleanup-progress-bar" style="background:var(--accent);height:100%;width:0%;transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <div id="cleanup-list" style="display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto;"></div>
+        </div>
+
+        <div id="cleanup-done" class="hidden" style="background:#f0faf0;border:1px solid #a3d9a5;border-radius:6px;padding:14px 18px;">
+          <div style="font-weight:700;color:#2d6a2d;margin-bottom:8px;" id="cleanup-done-title">✓ Cleanup complete</div>
+          <div id="cleanup-done-list" style="font-size:0.82rem;color:#3a5a3a;display:flex;flex-direction:column;gap:4px;"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Section: Bulk Reformat + Images ── -->
+    <div id="util-section-bulk-reformat" class="card" style="margin-bottom:20px;display:none;">
+      <div class="card-header" style="border-bottom:2px solid var(--accent-light);">
+        <span class="card-title">Bulk Reformat + Images</span>
+        <span style="font-size:0.75rem;color:var(--muted);margin-left:10px;">AI-reformat posts and append extracted images — processes 10 at a time</span>
+      </div>
+      <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
+
+        <!-- What it does -->
+        <div style="background:#fdf6e3;border:1px solid #e8d5a3;border-left:4px solid var(--accent);border-radius:6px;padding:14px 16px;font-size:0.82rem;color:#5a4a1a;line-height:1.6;">
+          <strong>What this does:</strong> For each selected post — fetches the content, sends it through Gemini AI smart formatting, extracts and appends image links, then pushes the result back to Blogger. The original post is overwritten with the reformatted version.
+        </div>
+
+        <!-- Blog URL + load -->
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input id="bulk-blog-url" type="text" class="input" placeholder="https://yourblog.here.com" style="flex:1;" />
+          <button class="btn btn-primary" onclick="bulkLoadPosts()">Load Posts</button>
+        </div>
+
+        <div id="bulk-status" style="font-size:0.83rem;color:var(--muted);min-height:20px;"></div>
+
+        <!-- Theme picker -->
+        <div id="bulk-theme-row" class="hidden" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:0.8rem;font-weight:700;color:var(--primary);">Theme:</span>
+          <div id="bulk-theme-btns" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+
+        <!-- Post list with checkboxes -->
+        <div id="bulk-post-section" class="hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+            <span id="bulk-post-count" style="font-size:0.85rem;font-weight:700;color:var(--primary);"></span>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <label style="font-size:0.8rem;color:var(--muted);cursor:pointer;">
+                <input type="checkbox" id="bulk-select-all" onchange="bulkToggleAll(this.checked)" style="margin-right:4px;">Select All
+              </label>
+              <button id="bulk-load-more-btn" class="btn btn-sm"
+                style="background:var(--warm);border:1px solid var(--border);color:var(--primary);display:none;"
+                onclick="bulkLoadMore()">Load More</button>
+            </div>
+          </div>
+          <div id="bulk-post-list" style="display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto;margin-bottom:12px;"></div>
+
+          <div style="background:#f5f0fa;border:1px solid #d4b8f0;border-left:4px solid #9b6dca;border-radius:6px;padding:12px 16px;font-size:0.8rem;color:#4a3a5a;line-height:1.5;margin-bottom:12px;">
+            <strong>Note on speed:</strong> Each post requires a Gemini AI call + 2 Blogger API calls. Processes <strong>one post every 3 seconds</strong> to avoid rate limits on both services. 10 posts ≈ 30s, 50 posts ≈ 2.5 min.
+          </div>
+
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button class="btn btn-sm" id="bulk-run-10-btn"
+              style="background:var(--warm);border:1px solid var(--border);color:var(--primary);"
+              onclick="bulkRunSelected(10)">Run Next 10</button>
+            <button class="btn btn-accent btn-sm" id="bulk-run-all-btn"
+              onclick="bulkRunSelected(Infinity)">✨ Run All Selected</button>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="bulk-progress" class="hidden" style="margin-bottom:4px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:var(--muted);margin-bottom:4px;">
+            <span id="bulk-progress-label">Processing…</span>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="bulk-progress-pct"></span>
+              <button class="btn btn-sm" id="bulk-cancel-btn" onclick="bulkCancel()"
+                style="background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;padding:2px 10px;">✕ Cancel</button>
+            </div>
+          </div>
+          <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden;">
+            <div id="bulk-progress-bar" style="background:var(--accent);height:100%;width:0%;transition:width 0.3s;"></div>
+          </div>
+        </div>
+
+        <!-- Results log -->
+        <div id="bulk-done" class="hidden" style="background:#f0faf0;border:1px solid #a3d9a5;border-radius:6px;padding:14px 18px;">
+          <div style="font-weight:700;color:#2d6a2d;margin-bottom:8px;" id="bulk-done-title">✓ Batch complete</div>
+          <div id="bulk-done-list" style="font-size:0.82rem;color:#3a5a3a;display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;"></div>
+        </div>
+
+      </div>
+    </div>
+
+    </div><!-- /util-mode-bulk -->
+
+  </div>
+</div><!-- /tab-utilities -->
+
+
+<!-- ─────────────────────────────────────────
+     TAB 5 · ABOUT
 ───────────────────────────────────────────── -->
 <div id="tab-about" class="tab-pane">
   <div style="max-width:780px;margin:0 auto;">
 
     <!-- Hero -->
     <div style="background:var(--primary);border-radius:10px;padding:36px 40px;margin-bottom:24px;color:white;">
-      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Blog Management Tools</div>
-      <h1 style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-bottom:10px;line-height:1.2;">Blogger Tools</h1>
-      <p style="font-size:0.95rem;color:rgba(255,255,255,0.75);line-height:1.6;max-width:560px;">A local web app for formatting, styling, and managing blog posts on Blogger.com — built for speed and for the way you actually write.</p>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <div style="width:52px;height:52px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+            <path d="M12 5C10 3.5 7 3 4 3.5V17.5C7 17 10 17.5 12 19V5Z" fill="#1a2640"/>
+            <path d="M12 5C14 3.5 17 3 20 3.5V17.5C17 17 14 17.5 12 19V5Z" fill="#1a2640" opacity="0.65"/>
+            <line x1="12" y1="5" x2="12" y2="19" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M19 1l.5 1.5L21 3l-1.5.5L19 5l-.5-1.5L17 3l1.5-.5Z" fill="#c9a84c"/>
+            <path d="M7 9.5C7 8.7 7.7 8 8.5 8S10 8.7 10 9.5C10 11 8.5 12 8.5 12S7 11 7 9.5Z" fill="#c9a84c" opacity="0.85"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Personal Blog Management</div>
+          <h1 style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;line-height:1.2;">My Blogging Helper</h1>
+        </div>
+      </div>
+      <p style="font-size:0.95rem;color:rgba(255,255,255,0.75);line-height:1.6;max-width:560px;">A private web app for writing, formatting, and managing posts on Blogger.com — with AI smart formatting, bulk editing tools, and direct API access to your blog.</p>
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;">
         <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 14px;font-size:0.78rem;color:rgba(255,255,255,0.7);">Created April 18, 2026</span>
         <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 14px;font-size:0.78rem;color:rgba(255,255,255,0.7);">Built with VS Code &amp; Claude Code</span>
@@ -695,76 +906,84 @@ code {
       </div>
     </div>
 
-    <!-- Tools overview -->
+    <!-- Nav overview -->
+    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--primary);margin-bottom:14px;">How It's Organised</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px;">
+      <div class="card" style="text-align:center;padding:20px 14px;">
+        <div style="font-size:1.6rem;margin-bottom:8px;">📝</div>
+        <div style="font-weight:700;color:var(--primary);margin-bottom:6px;">Blog Editor</div>
+        <p style="font-size:0.8rem;color:var(--muted);line-height:1.5;">Connect to Blogger via OAuth. Browse, edit, and push posts back live. Filter by year, one-click AI reformat.</p>
+      </div>
+      <div class="card" style="text-align:center;padding:20px 14px;">
+        <div style="font-size:1.6rem;margin-bottom:8px;">🛠️</div>
+        <div style="font-weight:700;color:var(--primary);margin-bottom:6px;">Utilities</div>
+        <p style="font-size:0.8rem;color:var(--muted);line-height:1.5;">Single Post tools (Blog Formatter, Image Cleaner) and Bulk Operations (Link Cleanup, Bulk Reformat) in one tab.</p>
+      </div>
+      <div class="card" style="text-align:center;padding:20px 14px;">
+        <div style="font-size:1.6rem;margin-bottom:8px;">ℹ️</div>
+        <div style="font-weight:700;color:var(--primary);margin-bottom:6px;">About</div>
+        <p style="font-size:0.8rem;color:var(--muted);line-height:1.5;">This page — feature overview, input syntax reference, and build info.</p>
+      </div>
+    </div>
+
+    <!-- Tools grid -->
+    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--primary);margin-bottom:14px;">Features</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
 
       <div class="card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2640" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          </div>
-          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;">Blog Formatter</div>
+          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✍️</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--primary);font-weight:700;">Blog Formatter</div>
         </div>
-        <p style="font-size:0.86rem;color:var(--body-text);line-height:1.6;margin-bottom:10px;">Paste plain text or light markdown and get fully styled, inline-CSS Blogger-ready HTML. Choose from 7 color themes. Handles sections, lists, callouts, tables, and image grids automatically.</p>
-        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">How to use</div>
-        <ol style="font-size:0.83rem;color:var(--body-text);line-height:1.7;padding-left:18px;margin:0;">
-          <li>Paste your text into the input box</li>
-          <li>Click <strong>Smart Format (AI)</strong> to let Gemini structure it, or <strong>Format Post</strong> for manual markdown</li>
-          <li>Pick a color theme from the row of swatches</li>
-          <li>Copy the HTML and paste into Blogger's HTML editor</li>
-        </ol>
+        <p style="font-size:0.84rem;color:var(--body-text);line-height:1.6;margin-bottom:8px;">Paste plain text or markdown → get fully-styled inline-CSS Blogger HTML. 7 color themes. Smart Format uses Gemini AI to auto-structure sections, KPI stats, lists and tables.</p>
+        <div style="font-size:0.75rem;color:var(--muted);">Utilities → Single Post</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🖼️</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--primary);font-weight:700;">Image Cleaner</div>
+        </div>
+        <p style="font-size:0.84rem;color:var(--body-text);line-height:1.6;margin-bottom:8px;">Paste any Blogger HTML → extracts all <code>&lt;a&gt;&lt;img&gt;</code> blocks, strips <code>float:left</code> and margin styles, previews thumbnails, and copies clean HTML.</p>
+        <div style="font-size:0.75rem;color:var(--muted);">Utilities → Single Post</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">📝</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--primary);font-weight:700;">Blog Editor</div>
+        </div>
+        <p style="font-size:0.84rem;color:var(--body-text);line-height:1.6;margin-bottom:8px;">OAuth connection to Blogger API v3. Browse posts by year, load HTML, one-click <strong>⚡ Reformat + Images</strong>, live preview, and save back. Labels/tags preserved on save.</p>
+        <div style="font-size:0.75rem;color:var(--muted);">Blog Editor tab</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🔗</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--primary);font-weight:700;">Link Cleanup</div>
+        </div>
+        <p style="font-size:0.84rem;color:var(--body-text);line-height:1.6;margin-bottom:8px;">Scans every post and removes stray tags (editable — defaults to the old Google Fonts <code>&lt;link&gt;</code>). Processes one post per 1.5 s to stay under API limits. Fix Next 25 or Fix All with cancel.</p>
+        <div style="font-size:0.75rem;color:var(--muted);">Utilities → Bulk Operations</div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✨</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--primary);font-weight:700;">Bulk Reformat + Images</div>
+        </div>
+        <p style="font-size:0.84rem;color:var(--body-text);line-height:1.6;margin-bottom:8px;">Select posts with checkboxes → AI reformats + extracts images → pushes back 10 at a time. Icons show ✅ already done / 🔄 different theme / ○ not yet formatted. Cancel at any time.</p>
+        <div style="font-size:0.75rem;color:var(--muted);">Utilities → Bulk Operations</div>
       </div>
 
       <div class="card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
           <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2640" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9l4-4 4 4 4-4 4 4"/><circle cx="8.5" cy="14.5" r="1.5"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a2640" stroke-width="2.5"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
           </div>
-          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;">Image Cleaner</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--primary);font-weight:700;">Gemini AI</div>
         </div>
-        <p style="font-size:0.86rem;color:var(--body-text);line-height:1.6;margin-bottom:10px;">Paste any Blogger post HTML to extract every <code>&lt;a&gt;&lt;img&gt;&lt;/a&gt;</code> image block — stripped clean and ready to copy back in. Shows a thumbnail grid so you can see what was found.</p>
-        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">How to use</div>
-        <ol style="font-size:0.83rem;color:var(--body-text);line-height:1.7;padding-left:18px;margin:0;">
-          <li>Paste Blogger HTML into the input box</li>
-          <li>Click <strong>Extract Images</strong></li>
-          <li>Review the thumbnail preview grid</li>
-          <li>Click <strong>Copy All HTML</strong> and paste back into Blogger</li>
-        </ol>
-      </div>
-
-      <div class="card">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2640" stroke-width="2"><path d="M21.6 12.2c0-.7-.06-1.36-.18-2H12v3.79h5.41c-.23 1.22-.95 2.26-2.02 2.95v2.45h3.27C20.6 17.61 21.6 15.07 21.6 12.2z" fill="#4285F4"/><path d="M12 22c2.7 0 4.96-.9 6.61-2.42l-3.27-2.53c-.9.6-2.05.96-3.34.96-2.57 0-4.74-1.74-5.52-4.07H3.16v2.62C4.8 19.76 8.17 22 12 22z" fill="#34A853"/><path d="M6.48 13.94A5.85 5.85 0 016.16 12c0-.67.12-1.32.32-1.94V7.44H3.16A9.99 9.99 0 002 12c0 1.61.38 3.14 1.16 4.56l3.32-2.62z" fill="#FBBC05"/><path d="M12 6.06c1.46 0 2.77.5 3.8 1.5l2.85-2.85C16.95 3.07 14.69 2 12 2 8.17 2 4.8 4.24 3.16 7.44l3.32 2.62C7.26 7.8 9.43 6.06 12 6.06z" fill="#EA4335"/></svg>
-          </div>
-          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;">Blogger Connect</div>
-        </div>
-        <p style="font-size:0.86rem;color:var(--body-text);line-height:1.6;margin-bottom:10px;">OAuth connection to your Blogger account. Browse posts by year, load HTML, reformat with AI, extract images, and push changes back — without ever leaving this app.</p>
-        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">How to use</div>
-        <ol style="font-size:0.83rem;color:var(--body-text);line-height:1.7;padding-left:18px;margin:0;">
-          <li>Set up OAuth credentials in Google Cloud Console (one-time)</li>
-          <li>Click <strong>Connect with Google</strong> and authorize</li>
-          <li>Enter your blog URL to load posts</li>
-          <li>Filter by year, pick a post, then use <strong>⚡ Reformat + Images</strong></li>
-          <li>Review the preview and click <strong>↑ Save to Blogger</strong></li>
-        </ol>
-      </div>
-
-      <div class="card">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <div style="width:32px;height:32px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a2640" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-          </div>
-          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;">Smart Format (AI)</div>
-        </div>
-        <p style="font-size:0.86rem;color:var(--body-text);line-height:1.6;margin-bottom:10px;">Powered by Google Gemini. Paste raw text and the AI auto-detects sections, generates KPI stats, structures lists and tables, and produces clean markdown ready to render. Switch models in ⚙ if you hit a daily quota limit.</p>
-        <div style="font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:6px;">Setup</div>
-        <ol style="font-size:0.83rem;color:var(--body-text);line-height:1.7;padding-left:18px;margin:0;">
-          <li>Get a free key at <strong>aistudio.google.com</strong></li>
-          <li>Click ⚙ in Blog Formatter and paste the key</li>
-          <li>Pick a model — <strong>Gemini 2.5 Flash</strong> is the default</li>
-          <li>Click <strong>Smart Format (AI)</strong> — review the markdown and re-render if needed</li>
-        </ol>
+        <p style="font-size:0.84rem;color:var(--body-text);line-height:1.6;margin-bottom:8px;">Pick from Gemini 2.5 Flash, 2.5 Flash Lite, 3 Flash (preview), or 3.1 Flash Lite via the ⚙ panel. Each model has its own daily quota — switch if you hit a limit. Key saved locally.</p>
+        <div style="font-size:0.75rem;color:var(--muted);">⚙ settings panel — available on Blog Editor and Utilities</div>
       </div>
 
     </div>
@@ -772,7 +991,7 @@ code {
     <!-- Input format reference -->
     <div class="card" style="margin-bottom:24px;">
       <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--primary);font-weight:700;margin-bottom:12px;">Formatter Input Syntax</div>
-      <p style="font-size:0.84rem;color:var(--muted);margin-bottom:14px;">For manual formatting (or to review what Smart Format produces). Smart Format handles this automatically so you don't need to memorise it.</p>
+      <p style="font-size:0.84rem;color:var(--muted);margin-bottom:14px;">Smart Format handles this automatically. Handy to know for manual posts or to review AI output.</p>
       <pre style="background:var(--warm);border:1px solid var(--border);border-radius:6px;padding:16px;font-size:0.8rem;line-height:1.7;overflow-x:auto;color:var(--body-text);white-space:pre-wrap;">TITLE: My Post Title
 SUBTITLE: Optional italic subtitle
 EYEBROW: Travel Journal
@@ -804,14 +1023,15 @@ FOOTER: Thanks for reading.</pre>
         <span class="badge">Google Gemini API</span>
         <span class="badge">Blogger API v3</span>
         <span class="badge">Google OAuth2</span>
+        <span class="badge">gunicorn</span>
         <span class="badge">VS Code</span>
         <span class="badge">Claude Code</span>
       </div>
       <p style="font-size:0.82rem;color:var(--muted);margin-top:14px;line-height:1.6;">
-        Created <strong>April 18, 2026</strong>.<br>
+        Created <strong>April 18, 2026</strong> · Last updated <strong>April 19, 2026</strong>.<br>
         Built entirely using <strong>VS Code</strong> with <strong>Claude Code</strong> (Anthropic AI) as the coding assistant.<br>
         Runs locally on your machine — no data leaves your computer except API calls to Google.<br><br>
-        Source code: <a href="https://github.com/WSUN2019/blogger_tool" target="_blank" style="color:var(--primary);font-weight:700;">github.com/WSUN2019/blogger_tool</a>
+        Source code: <a href="https://github.com/WSUN2019/my_blogging_helper" target="_blank" style="color:var(--primary);font-weight:700;">github.com/WSUN2019/my_blogging_helper</a>
       </p>
     </div>
 
@@ -839,7 +1059,7 @@ function switchTab(name) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  const order = ['formatter', 'cleaner', 'blogger', 'about'];
+  const order = ['blogger', 'cleanup', 'about'];
   document.querySelectorAll('.tab-btn')[order.indexOf(name)].classList.add('active');
 }
 
@@ -1453,9 +1673,14 @@ document.getElementById('formatter-input').addEventListener('paste', function() 
   }, 0);
 });
 
+const _UTIL_SINGLE_TOOLS = ['formatter', 'cleaner'];
+const _UTIL_BULK_TOOLS   = ['link-cleanup', 'bulk-reformat'];
+
 loadThemes();
 checkBloggerStatus();
 checkGeminiStatus();
+showUtilMode('single');
+showUtil('formatter');
 
 const params = new URLSearchParams(location.search);
 if (params.get('tab') === 'blogger') {
@@ -1463,6 +1688,430 @@ if (params.get('tab') === 'blogger') {
   if (params.get('connected')) toast('Connected to Blogger successfully!', 'success');
   if (params.get('error')) toast('OAuth error: ' + params.get('error'), 'error');
   history.replaceState({}, '', '/');
+}
+
+// ═══════════════════════════════════════════
+//  CLEANUP
+// ═══════════════════════════════════════════
+let _cleanupBlogId = '';
+let _cleanupAffected = [];
+let _cleanupRunning = false;
+let _cleanupCancelled = false;
+
+const _CLEANUP_DEFAULT_TAG = '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Lato:wght@300;400;700&amp;display=swap" rel="stylesheet"></link>';
+
+function _cleanupTag() {
+  return document.getElementById('cleanup-tag-input').value.trim();
+}
+
+function cleanupResetTag() {
+  document.getElementById('cleanup-tag-input').value = _CLEANUP_DEFAULT_TAG;
+}
+
+async function cleanupScan() {
+  const url = document.getElementById('cleanup-blog-url').value.trim();
+  if (!url) { toast('Enter your blog URL first', 'error'); return; }
+
+  const status = document.getElementById('cleanup-status');
+  document.getElementById('cleanup-results').classList.add('hidden');
+  document.getElementById('cleanup-done').classList.add('hidden');
+  status.textContent = 'Fetching blog info…';
+
+  try {
+    const blog = await (await fetch('/blogger/blog?url=' + encodeURIComponent(url))).json();
+    if (blog.error) { status.textContent = 'Error: ' + blog.error; return; }
+    _cleanupBlogId = blog.id;
+    status.textContent = `Scanning "${blog.name}" (${blog.posts} posts)…`;
+
+    const data = await post('/blogger/cleanup/scan', {blog_id: _cleanupBlogId, tag: _cleanupTag()});
+    if (data.error) { status.textContent = 'Error: ' + data.error; return; }
+
+    _cleanupAffected = data.affected;
+    status.textContent = '';
+
+    if (data.count === 0) {
+      status.textContent = '✓ No posts contain the stray font link — nothing to clean up.';
+      return;
+    }
+
+    _renderCleanupList();
+    document.getElementById('cleanup-results').classList.remove('hidden');
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+}
+
+function _renderCleanupList() {
+  const total = _cleanupAffected.length;
+  const secs = Math.ceil(total * 1.5);
+  const timeStr = secs >= 60 ? `~${Math.ceil(secs/60)} min` : `~${secs}s`;
+  document.getElementById('cleanup-count-label').textContent =
+    `${total} post${total !== 1 ? 's' : ''} contain the stray font link`;
+  document.getElementById('cleanup-fix-btn').title = `Estimated time: ${timeStr}`;
+  document.getElementById('cleanup-batch-btn').title = 'Fix up to 25 posts (~38s)';
+
+  const list = document.getElementById('cleanup-list');
+  list.innerHTML = '';
+  for (const p of _cleanupAffected) {
+    const row = document.createElement('div');
+    row.id = 'cleanup-row-' + p.id;
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--warm);border-radius:6px;font-size:0.83rem;';
+    row.innerHTML = `<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.title}">${p.title}</span>
+      <span style="color:var(--muted);font-size:0.75rem;margin-left:12px;flex-shrink:0;">${(p.published||'').slice(0,10)}</span>
+      <span id="cleanup-row-status-${p.id}" style="margin-left:12px;font-size:0.75rem;flex-shrink:0;"></span>`;
+    list.appendChild(row);
+  }
+}
+
+function cleanupCancel() {
+  _cleanupCancelled = true;
+  document.getElementById('cleanup-cancel-btn').disabled = true;
+  document.getElementById('cleanup-cancel-btn').textContent = 'Cancelling…';
+}
+
+async function cleanupFixBatch(limit) {
+  if (_cleanupRunning || !_cleanupAffected.length) return;
+  _cleanupRunning = true;
+  _cleanupCancelled = false;
+
+  const fixBtn = document.getElementById('cleanup-fix-btn');
+  const batchBtn = document.getElementById('cleanup-batch-btn');
+  const cancelBtn = document.getElementById('cleanup-cancel-btn');
+  fixBtn.disabled = batchBtn.disabled = true;
+  cancelBtn.disabled = false;
+  cancelBtn.textContent = '✕ Cancel';
+
+  const batch = _cleanupAffected.slice(0, limit === Infinity ? _cleanupAffected.length : limit);
+  const total = batch.length;
+  const progress = document.getElementById('cleanup-progress');
+  const progressLabel = document.getElementById('cleanup-progress-label');
+  const progressPct = document.getElementById('cleanup-progress-pct');
+  const progressBar = document.getElementById('cleanup-progress-bar');
+  progress.classList.remove('hidden');
+
+  const doneList = document.getElementById('cleanup-done-list');
+  let fixed = 0, errors = 0;
+
+  for (let i = 0; i < batch.length; i++) {
+    if (_cleanupCancelled) break;
+
+    const p = batch[i];
+    const pct = Math.round(((i) / total) * 100);
+    progressLabel.textContent = `Fixing "${p.title}"…`;
+    progressPct.textContent = `${i + 1} / ${total}`;
+    progressBar.style.width = pct + '%';
+
+    const statusEl = document.getElementById('cleanup-row-status-' + p.id);
+    if (statusEl) statusEl.textContent = '⏳';
+
+    try {
+      const r = await post('/blogger/cleanup/fix-one', {blog_id: _cleanupBlogId, post_id: p.id, tag: _cleanupTag()});
+      if (r.status === 'fixed') {
+        fixed++;
+        if (statusEl) { statusEl.textContent = '✓'; statusEl.style.color = '#2d6a2d'; }
+        const row = document.createElement('div');
+        row.textContent = '✓ ' + p.title;
+        row.style.color = '#2d6a2d';
+        doneList.appendChild(row);
+        _cleanupAffected = _cleanupAffected.filter(x => x.id !== p.id);
+      } else {
+        errors++;
+        if (statusEl) { statusEl.textContent = '✗'; statusEl.style.color = '#a33'; }
+        const row = document.createElement('div');
+        row.textContent = '✗ ' + p.title + ': ' + (r.error || 'unknown error');
+        row.style.color = '#a33';
+        doneList.appendChild(row);
+      }
+    } catch(e) {
+      errors++;
+      if (statusEl) { statusEl.textContent = '✗'; statusEl.style.color = '#a33'; }
+    }
+
+    if (i < batch.length - 1) await new Promise(r => setTimeout(r, 1500));
+  }
+
+  progressBar.style.width = _cleanupCancelled ? progressBar.style.width : '100%';
+  progressLabel.textContent = _cleanupCancelled ? 'Cancelled' : 'Done';
+  cancelBtn.disabled = true;
+
+  const remaining = _cleanupAffected.length;
+  const cancelNote = _cleanupCancelled ? ' · cancelled' : '';
+  document.getElementById('cleanup-done-title').textContent =
+    `${_cleanupCancelled ? '⚠ Stopped' : '✓ Batch complete'} — ${fixed} fixed${errors ? ', ' + errors + ' error(s)' : ''}${cancelNote}` +
+    (remaining > 0 ? ` · ${remaining} post${remaining !== 1 ? 's' : ''} remaining` : '');
+  document.getElementById('cleanup-done').classList.remove('hidden');
+
+  if (remaining === 0) {
+    document.getElementById('cleanup-results').classList.add('hidden');
+  } else {
+    _renderCleanupList();
+    document.getElementById('cleanup-count-label').textContent =
+      `${remaining} post${remaining !== 1 ? 's' : ''} remaining`;
+  }
+
+  _cleanupRunning = false;
+  fixBtn.disabled = batchBtn.disabled = false;
+}
+
+// ═══════════════════════════════════════════
+//  UTILITIES SUB-NAV
+// ═══════════════════════════════════════════
+function showUtilMode(mode) {
+  const isSingle = mode === 'single';
+  document.getElementById('util-mode-single').style.display = isSingle ? '' : 'none';
+  document.getElementById('util-mode-bulk').style.display   = isSingle ? 'none' : '';
+  const btnSingle = document.getElementById('util-mode-btn-single');
+  const btnBulk   = document.getElementById('util-mode-btn-bulk');
+  btnSingle.style.background = isSingle ? 'var(--primary)' : 'white';
+  btnSingle.style.color      = isSingle ? 'white' : 'var(--muted)';
+  btnBulk.style.background   = isSingle ? 'white' : 'var(--primary)';
+  btnBulk.style.color        = isSingle ? 'var(--muted)' : 'white';
+}
+
+function showUtil(name) {
+  const isSingle = _UTIL_SINGLE_TOOLS.includes(name);
+  const tools = isSingle ? _UTIL_SINGLE_TOOLS : _UTIL_BULK_TOOLS;
+  tools.forEach(s => {
+    document.getElementById('util-section-' + s).style.display = s === name ? '' : 'none';
+    const nav = document.getElementById('util-nav-' + s);
+    if (!nav) return;
+    if (s === name) {
+      nav.style.border = '2px solid var(--accent)';
+      nav.style.background = 'var(--warm)';
+    } else {
+      nav.style.border = '2px solid var(--border)';
+      nav.style.background = 'white';
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  BULK REFORMAT + IMAGES
+// ═══════════════════════════════════════════
+let _bulkBlogId = '';
+let _bulkAllPosts = [];
+let _bulkNextPageToken = null;
+let _bulkRunning = false;
+let _bulkCancelled = false;
+let _bulkTheme = 'navy_gold';
+
+async function bulkLoadPosts() {
+  const url = document.getElementById('bulk-blog-url').value.trim();
+  if (!url) { toast('Enter your blog URL first', 'error'); return; }
+  const status = document.getElementById('bulk-status');
+  status.textContent = 'Fetching blog info…';
+  _bulkAllPosts = [];
+  _bulkNextPageToken = null;
+  document.getElementById('bulk-post-section').classList.add('hidden');
+  document.getElementById('bulk-done').classList.add('hidden');
+  document.getElementById('bulk-progress').classList.add('hidden');
+
+  try {
+    const blog = await (await fetch('/blogger/blog?url=' + encodeURIComponent(url))).json();
+    if (blog.error) { status.textContent = 'Error: ' + blog.error; return; }
+    _bulkBlogId = blog.id;
+    status.textContent = `Loading posts from "${blog.name}"…`;
+    await _bulkFetchPage();
+    _bulkRenderThemes();
+    _bulkRenderPosts();
+    document.getElementById('bulk-theme-row').classList.remove('hidden');
+    document.getElementById('bulk-post-section').classList.remove('hidden');
+    status.textContent = 'Checking formatting status…';
+    await _bulkCheckThemes(_bulkAllPosts);
+    status.textContent = '';
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+}
+
+async function _bulkFetchPage() {
+  let qs = '/blogger/posts?blog_id=' + _bulkBlogId + '&max=50';
+  if (_bulkNextPageToken) qs += '&page_token=' + encodeURIComponent(_bulkNextPageToken);
+  const data = await (await fetch(qs)).json();
+  if (data.error) throw new Error(data.error);
+  _bulkAllPosts = _bulkAllPosts.concat(data.posts || []);
+  _bulkNextPageToken = data.next_page_token || null;
+  document.getElementById('bulk-load-more-btn').style.display = _bulkNextPageToken ? '' : 'none';
+}
+
+async function bulkLoadMore() {
+  if (!_bulkNextPageToken) return;
+  document.getElementById('bulk-status').textContent = 'Loading more…';
+  const prevCount = _bulkAllPosts.length;
+  await _bulkFetchPage();
+  _bulkRenderPosts();
+  const newPosts = _bulkAllPosts.slice(prevCount);
+  document.getElementById('bulk-status').textContent = 'Checking formatting status…';
+  await _bulkCheckThemes(newPosts);
+  document.getElementById('bulk-status').textContent = '';
+}
+
+function _bulkRenderThemes() {
+  const container = document.getElementById('bulk-theme-btns');
+  container.innerHTML = '';
+  const themes = [
+    {key:'navy_gold',name:'Navy/Gold'},{key:'woodsy',name:'Woodsy'},
+    {key:'ocean',name:'Ocean'},{key:'brick',name:'Brick'},
+    {key:'purple',name:'Purple'},{key:'forest',name:'Forest'},{key:'slate',name:'Slate'}
+  ];
+  themes.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm';
+    btn.textContent = t.name;
+    btn.style.cssText = t.key === _bulkTheme
+      ? 'background:var(--primary);color:white;border:1px solid var(--primary);'
+      : 'background:var(--warm);border:1px solid var(--border);color:var(--primary);';
+    btn.onclick = () => { _bulkTheme = t.key; _bulkRenderThemes(); if (_bulkAllPosts.length) _bulkCheckThemes(_bulkAllPosts); };
+    container.appendChild(btn);
+  });
+}
+
+function _bulkRenderPosts() {
+  const list = document.getElementById('bulk-post-list');
+  list.innerHTML = '';
+  _bulkAllPosts.forEach((p, i) => {
+    const row = document.createElement('label');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--warm);border-radius:6px;font-size:0.83rem;cursor:pointer;';
+    row.innerHTML = `<input type="checkbox" class="bulk-post-cb" data-id="${p.id}" data-idx="${i}" style="flex-shrink:0;">
+      <span id="bulk-theme-icon-${p.id}" title="" style="flex-shrink:0;font-size:0.9rem;">⏳</span>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.title}">${p.title}</span>
+      <span style="color:var(--muted);font-size:0.75rem;flex-shrink:0;">${(p.published||'').slice(0,10)}</span>
+      <span id="bulk-row-status-${p.id}" style="font-size:0.75rem;flex-shrink:0;margin-left:4px;"></span>`;
+    list.appendChild(row);
+  });
+  document.getElementById('bulk-post-count').textContent =
+    `${_bulkAllPosts.length} posts loaded`;
+}
+
+async function _bulkCheckThemes(posts) {
+  if (!posts.length) return;
+  // Check in batches of 10 to avoid overwhelming the API
+  const BATCH = 10;
+  for (let i = 0; i < posts.length; i += BATCH) {
+    const batch = posts.slice(i, i + BATCH);
+    try {
+      const data = await post('/blogger/bulk/check-themes', {
+        blog_id: _bulkBlogId,
+        post_ids: batch.map(p => p.id)
+      });
+      if (data.themes) {
+        for (const p of batch) {
+          const found = data.themes[p.id];
+          const icon = document.getElementById('bulk-theme-icon-' + p.id);
+          if (!icon) continue;
+          if (!found) {
+            icon.textContent = '○';
+            icon.title = 'Not yet formatted';
+            icon.style.color = 'var(--muted)';
+          } else if (found === _bulkTheme) {
+            icon.textContent = '✅';
+            icon.title = `Already formatted: ${found}`;
+          } else {
+            icon.textContent = '🔄';
+            icon.title = `Formatted with different theme: ${found}`;
+          }
+        }
+      }
+    } catch(e) {
+      // silently clear spinners on error
+      for (const p of batch) {
+        const icon = document.getElementById('bulk-theme-icon-' + p.id);
+        if (icon) { icon.textContent = '?'; icon.style.color = 'var(--muted)'; }
+      }
+    }
+  }
+}
+
+function bulkToggleAll(checked) {
+  document.querySelectorAll('.bulk-post-cb').forEach(cb => cb.checked = checked);
+}
+
+function _bulkSelectedPosts() {
+  return Array.from(document.querySelectorAll('.bulk-post-cb:checked'))
+    .map(cb => _bulkAllPosts[parseInt(cb.dataset.idx)]);
+}
+
+function bulkCancel() {
+  _bulkCancelled = true;
+  document.getElementById('bulk-cancel-btn').disabled = true;
+  document.getElementById('bulk-cancel-btn').textContent = 'Cancelling…';
+}
+
+async function bulkRunSelected(limit) {
+  if (_bulkRunning) return;
+  const selected = _bulkSelectedPosts();
+  if (!selected.length) { toast('Select at least one post', 'error'); return; }
+
+  const batch = selected.slice(0, limit === Infinity ? selected.length : limit);
+  _bulkRunning = true;
+  _bulkCancelled = false;
+
+  const run10Btn = document.getElementById('bulk-run-10-btn');
+  const runAllBtn = document.getElementById('bulk-run-all-btn');
+  const cancelBtn = document.getElementById('bulk-cancel-btn');
+  run10Btn.disabled = runAllBtn.disabled = true;
+  cancelBtn.disabled = false;
+  cancelBtn.textContent = '✕ Cancel';
+
+  const progress = document.getElementById('bulk-progress');
+  const progressLabel = document.getElementById('bulk-progress-label');
+  const progressPct = document.getElementById('bulk-progress-pct');
+  const progressBar = document.getElementById('bulk-progress-bar');
+  const doneList = document.getElementById('bulk-done-list');
+  progress.classList.remove('hidden');
+  document.getElementById('bulk-done').classList.add('hidden');
+  doneList.innerHTML = '';
+
+  let done = 0, errors = 0;
+  const total = batch.length;
+
+  for (let i = 0; i < batch.length; i++) {
+    if (_bulkCancelled) break;
+
+    const p = batch[i];
+    progressLabel.textContent = `Reformatting "${p.title}"…`;
+    progressPct.textContent = `${i + 1} / ${total}`;
+    progressBar.style.width = Math.round((i / total) * 100) + '%';
+    const statusEl = document.getElementById('bulk-row-status-' + p.id);
+    if (statusEl) statusEl.textContent = '⏳';
+
+    try {
+      const r = await post('/blogger/bulk/reformat-one', {
+        blog_id: _bulkBlogId, post_id: p.id, theme: _bulkTheme
+      });
+      if (r.status === 'done') {
+        done++;
+        if (statusEl) { statusEl.textContent = '✓'; statusEl.style.color = '#2d6a2d'; }
+        const row = document.createElement('div');
+        row.textContent = '✓ ' + p.title;
+        row.style.color = '#2d6a2d';
+        doneList.appendChild(row);
+      } else {
+        errors++;
+        if (statusEl) { statusEl.textContent = '✗'; statusEl.style.color = '#a33'; }
+        const row = document.createElement('div');
+        row.textContent = '✗ ' + p.title + ': ' + (r.error || 'unknown error');
+        row.style.color = '#a33';
+        doneList.appendChild(row);
+      }
+    } catch(e) {
+      errors++;
+      if (statusEl) { statusEl.textContent = '✗'; statusEl.style.color = '#a33'; }
+    }
+
+    if (i < batch.length - 1) await new Promise(r => setTimeout(r, 3000));
+  }
+
+  progressBar.style.width = _bulkCancelled ? progressBar.style.width : '100%';
+  progressLabel.textContent = _bulkCancelled ? 'Cancelled' : 'Done';
+  cancelBtn.disabled = true;
+
+  document.getElementById('bulk-done-title').textContent =
+    `${_bulkCancelled ? '⚠ Stopped' : '✓ Batch complete'} — ${done} reformatted${errors ? ', ' + errors + ' error(s)' : ''}${_bulkCancelled ? ' · cancelled' : ''}`;
+  document.getElementById('bulk-done').classList.remove('hidden');
+
+  _bulkRunning = false;
+  run10Btn.disabled = runAllBtn.disabled = false;
 }
 </script>
 <!-- ═══ GEMINI SETTINGS OVERLAY (global — accessible from any tab) ═══ -->
