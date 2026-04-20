@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-blogformat.py — Blogger-compatible HTML formatter for ModernSimpleLiving.com
+blogformat.py — Blogger-compatible HTML formatter for Blogname.com
 
 Usage:
     python blogformat.py input.txt                      # default navy/gold -> stdout
@@ -707,7 +707,7 @@ def render_table(headers: list, rows: list, theme: Theme) -> str:
 
 
 def render_footer(post: Post, theme: Theme) -> str:
-    text = post.footer or "Thanks for reading — more posts at ModernSimpleLiving.com"
+    text = post.footer or "Thanks for reading — more posts at Blogname.com"
     return (
         f'<footer style="border-top:1px solid {theme.border};text-align:center;'
         f'padding:32px 24px 48px;font-family:\'Lato\',sans-serif;'

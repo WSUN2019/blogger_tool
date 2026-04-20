@@ -1,7 +1,7 @@
 # My Blogging Helper
 
 A local web app for formatting and managing blog posts on Blogger.com.  
-Built for **ModernSimpleLiving.com** — navy/gold theme, inline-styled HTML, Blogger-compatible output.
+ — navy/gold theme, inline-styled HTML, Blogger-compatible output.
 
 ---
 
@@ -284,7 +284,7 @@ More text under a small all-caps sub-label.
 |----------|----------|----------|
 | value    | value    | value    |
 
-FOOTER: Thanks for reading — ModernSimpleLiving.com
+FOOTER: Thanks for reading — Blogname.com
 ```
 
 ### Available themes
