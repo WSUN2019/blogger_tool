@@ -828,9 +828,13 @@ code {
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
             <span id="bulk-post-count" style="font-size:0.85rem;font-weight:700;color:var(--primary);"></span>
             <div style="display:flex;gap:8px;align-items:center;">
-              <label style="font-size:0.8rem;color:var(--muted);cursor:pointer;">
-                <input type="checkbox" id="bulk-select-all" onchange="bulkToggleAll(this.checked)" style="margin-right:4px;">Select All
-              </label>
+              <div style="display:flex;gap:12px;align-items:center;">
+                <label style="font-size:0.8rem;color:var(--muted);cursor:pointer;">
+                  <input type="checkbox" id="bulk-select-all" onchange="bulkToggleAll(this.checked)" style="margin-right:4px;">Select All
+                </label>
+                <button class="btn btn-sm" onclick="bulkToggleAll(false);document.getElementById('bulk-select-all').checked=false;"
+                  style="background:none;border:none;color:var(--muted);font-size:0.8rem;padding:0;cursor:pointer;text-decoration:underline;">Unselect All</button>
+              </div>
               <button id="bulk-load-more-btn" class="btn btn-sm"
                 style="background:var(--warm);border:1px solid var(--border);color:var(--primary);display:none;"
                 onclick="bulkLoadMore()">Load More</button>
@@ -843,11 +847,8 @@ code {
           </div>
 
           <div style="display:flex;gap:8px;justify-content:flex-end;">
-            <button class="btn btn-sm" id="bulk-run-10-btn"
-              style="background:var(--warm);border:1px solid var(--border);color:var(--primary);"
-              onclick="bulkRunSelected(10)">Run Next 10</button>
             <button class="btn btn-accent btn-sm" id="bulk-run-all-btn"
-              onclick="bulkRunSelected(Infinity)">✨ Run All Selected</button>
+              onclick="bulkRunSelected()">✨ Run All Selected</button>
           </div>
         </div>
 
@@ -2043,19 +2044,18 @@ function bulkCancel() {
   document.getElementById('bulk-cancel-btn').textContent = 'Cancelling…';
 }
 
-async function bulkRunSelected(limit) {
+async function bulkRunSelected() {
   if (_bulkRunning) return;
   const selected = _bulkSelectedPosts();
   if (!selected.length) { toast('Select at least one post', 'error'); return; }
 
-  const batch = selected.slice(0, limit === Infinity ? selected.length : limit);
+  const batch = selected;
   _bulkRunning = true;
   _bulkCancelled = false;
 
-  const run10Btn = document.getElementById('bulk-run-10-btn');
   const runAllBtn = document.getElementById('bulk-run-all-btn');
   const cancelBtn = document.getElementById('bulk-cancel-btn');
-  run10Btn.disabled = runAllBtn.disabled = true;
+  runAllBtn.disabled = true;
   cancelBtn.disabled = false;
   cancelBtn.textContent = '✕ Cancel';
 
@@ -2117,7 +2117,7 @@ async function bulkRunSelected(limit) {
   document.getElementById('bulk-done').classList.remove('hidden');
 
   _bulkRunning = false;
-  run10Btn.disabled = runAllBtn.disabled = false;
+  runAllBtn.disabled = false;
 }
 </script>
 <!-- ═══ GEMINI SETTINGS OVERLAY (global — accessible from any tab) ═══ -->
