@@ -352,6 +352,98 @@ code {
   #gemini-setup > div:last-of-type { grid-template-columns: 1fr !important; }
   #gemini-setup { width: 92vw !important; }
 }
+
+/* ────────────────────────────────────────────
+   FEED REVIEW TAB
+──────────────────────────────────────────── */
+.feed-body {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+.feed-panel { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.feed-panel-head {
+  background: var(--primary); color: white;
+  padding: 10px 15px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.feed-search {
+  padding: 8px 10px; border-bottom: 1px solid var(--border);
+  background: var(--warm);
+}
+.feed-search input {
+  width: 100%; padding: 6px 10px; font-size: 0.82rem;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: white;
+}
+.feed-filters {
+  padding: 6px 10px 8px; border-bottom: 1px solid var(--border);
+  background: var(--warm); display: flex; flex-direction: column; gap: 5px;
+}
+.feed-filter-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.feed-filter-label {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); flex-shrink: 0; width: 38px;
+}
+.filter-chip {
+  padding: 2px 9px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;
+  cursor: pointer; border: 1px solid var(--border); background: white;
+  color: var(--muted); transition: all 0.12s;
+}
+.filter-chip:hover { background: var(--warm); }
+.filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+.feed-scroll { overflow-y: auto; max-height: 560px; }
+.feed-item {
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.12s;
+}
+.feed-item:hover { background: var(--warm); }
+.feed-item.selected { background: var(--warm); border-left: 3px solid var(--accent); padding-left: 11px; }
+.feed-item-title { font-size: 0.85rem; color: var(--primary); line-height: 1.3; margin-bottom: 3px; }
+.feed-item-meta { font-size: 0.7rem; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; }
+.feed-label-chip {
+  display: inline-block; padding: 1px 7px; border-radius: 10px;
+  background: var(--warm); border: 1px solid var(--border);
+  font-size: 0.68rem; color: var(--muted);
+}
+.feed-count-bar {
+  padding: 7px 14px; border-top: 1px solid var(--border);
+  font-size: 0.72rem; color: var(--muted); text-align: center;
+}
+.feed-detail { display: flex; flex-direction: column; gap: 12px; }
+.feed-detail-head { }
+.feed-detail-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; color: var(--primary); line-height: 1.35; margin-bottom: 6px;
+}
+.feed-detail-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.feed-mode-bar { display: flex; gap: 6px; }
+.feed-mode-btn {
+  padding: 5px 14px; border-radius: 4px; font-size: 0.76rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  border: 1px solid var(--border); background: white; color: var(--muted);
+  transition: all 0.12s;
+}
+.feed-mode-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+.feed-preview-frame {
+  width: 100%; border: 1px solid var(--border); border-radius: 5px;
+  background: white; min-height: 520px;
+}
+.feed-code-wrap { position: relative; }
+.feed-code-wrap textarea {
+  width: 100%; min-height: 520px; font-family: monospace; font-size: 0.78rem;
+  line-height: 1.5; resize: vertical;
+  border: 1px solid var(--border); border-radius: 5px;
+  padding: 12px 14px; background: #fafafa; color: var(--body-text);
+}
+.feed-copy-btn {
+  position: absolute; top: 8px; right: 8px;
+}
+@media (max-width: 860px) {
+  .feed-body { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -377,6 +469,7 @@ code {
   <nav class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('blogger')" id="blogger-tab-btn">Blog Editor</button>
     <button class="tab-btn" onclick="switchTab('cleanup')">Utilities</button>
+    <button class="tab-btn" onclick="switchTab('feed')">Backup Reviewer</button>
     <button class="tab-btn" onclick="switchTab('about')">About</button>
   </nav>
   <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
@@ -883,6 +976,91 @@ code {
 
 
 <!-- ─────────────────────────────────────────
+     TAB 4 · FEED REVIEW
+───────────────────────────────────────────── -->
+<div id="tab-feed" class="tab-pane">
+  <h1 class="page-title">Backup Reviewer</h1>
+  <p class="page-desc">Read your <code>blog_backup/feed.atom</code> file — the XML backup exported from Blogger.com. Browse all posts, preview their content, and copy the raw HTML to paste back into Blogger or anywhere else.</p>
+
+  <div id="feed-loading" class="text-muted" style="margin-top:24px;">Loading feed…</div>
+  <div id="feed-no-file" class="alert alert-error hidden">
+    <strong>feed.atom not found.</strong> Make sure <code>blog_backup/feed.atom</code> exists in the project folder.
+  </div>
+
+  <div id="feed-ready" class="hidden">
+    <div id="feed-summary" class="text-muted" style="font-size:0.82rem;margin-bottom:0;"></div>
+
+    <div class="feed-body">
+      <!-- ── Left: post list ── -->
+      <div>
+        <div class="feed-panel">
+          <div class="feed-panel-head">
+            Posts
+            <span id="feed-match-count" style="font-size:0.7rem;font-weight:400;opacity:0.7;"></span>
+          </div>
+          <div class="feed-search">
+            <input type="text" id="feed-search-input" placeholder="Search titles…" oninput="feedSearch(this.value)">
+          </div>
+          <div class="feed-filters">
+            <div class="feed-filter-row">
+              <span class="feed-filter-label">Year</span>
+              <div id="feed-year-chips" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+            </div>
+            <div class="feed-filter-row">
+              <span class="feed-filter-label">Label</span>
+              <div id="feed-label-chips" style="display:flex;flex-wrap:wrap;gap:4px;overflow-y:auto;max-height:120px;"></div>
+            </div>
+          </div>
+          <div id="feed-scroll" class="feed-scroll">
+            <div class="empty-state" style="padding:28px 14px;">Loading…</div>
+          </div>
+          <div id="feed-load-more" class="feed-count-bar hidden">
+            <button class="btn btn-outline btn-sm" onclick="feedLoadMore()">Load More</button>
+          </div>
+          <div id="feed-count-bar" class="feed-count-bar"></div>
+        </div>
+      </div>
+
+      <!-- ── Right: detail ── -->
+      <div>
+        <div id="feed-empty-state" class="empty-state card" style="min-height:300px;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:0.35"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Select a post from the list</span>
+        </div>
+
+        <div id="feed-detail" class="feed-detail hidden">
+          <div class="card" style="padding:14px 18px;">
+            <div id="feed-detail-title" class="feed-detail-title"></div>
+            <div class="feed-detail-meta">
+              <span id="feed-detail-date" class="text-muted" style="font-size:0.78rem;"></span>
+              <div id="feed-detail-labels" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px 18px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div class="feed-mode-bar">
+                <button class="feed-mode-btn active" id="feed-mode-preview-btn" onclick="setFeedMode('preview')">Preview</button>
+                <button class="feed-mode-btn" id="feed-mode-code-btn" onclick="setFeedMode('code')">HTML Code</button>
+              </div>
+            </div>
+
+            <div id="feed-preview-wrap">
+              <iframe id="feed-preview-frame" class="feed-preview-frame" frameborder="0"></iframe>
+            </div>
+
+            <div id="feed-code-wrap" class="feed-code-wrap hidden">
+              <textarea id="feed-code-output" readonly spellcheck="false"></textarea>
+              <button class="btn btn-accent btn-sm feed-copy-btn" onclick="feedCopyCode(this)">Copy HTML</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /tab-feed -->
+
+<!-- ─────────────────────────────────────────
      TAB 5 · ABOUT
 ───────────────────────────────────────────── -->
 <div id="tab-about" class="tab-pane">
@@ -1066,8 +1244,9 @@ function switchTab(name) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  const order = ['blogger', 'cleanup', 'about'];
+  const order = ['blogger', 'cleanup', 'feed', 'about'];
   document.querySelectorAll('.tab-btn')[order.indexOf(name)].classList.add('active');
+  if (name === 'feed') initFeed();
 }
 
 // ═══════════════════════════════════════════
@@ -2119,6 +2298,196 @@ async function bulkRunSelected() {
   _bulkRunning = false;
   runAllBtn.disabled = false;
 }
+
+// ═══════════════════════════════════════════
+//  FEED REVIEW
+// ═══════════════════════════════════════════
+let _feedPage = 1;
+let _feedSearch = '';
+let _feedYear = '';
+let _feedLabel = '';
+let _feedHasMore = false;
+let _feedCurrentContent = '';
+let _feedMode = 'preview';
+let _feedInitialized = false;
+
+async function initFeed() {
+  if (_feedInitialized) return;
+  _feedInitialized = true;
+  try {
+    const s = await get('/feed/status');
+    document.getElementById('feed-loading').classList.add('hidden');
+    if (!s.exists) {
+      document.getElementById('feed-no-file').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('feed-ready').classList.remove('hidden');
+    document.getElementById('feed-summary').textContent =
+      `${s.count} posts found in feed.atom`;
+
+    // Year chips
+    const yearWrap = document.getElementById('feed-year-chips');
+    yearWrap.innerHTML = '';
+    const allChip = document.createElement('span');
+    allChip.className = 'filter-chip active';
+    allChip.id = 'feed-year-all';
+    allChip.textContent = 'All';
+    allChip.onclick = () => toggleFeedYear('', allChip);
+    yearWrap.appendChild(allChip);
+    s.years.forEach(y => {
+      const c = document.createElement('span');
+      c.className = 'filter-chip';
+      c.textContent = y;
+      c.onclick = () => toggleFeedYear(y, c);
+      yearWrap.appendChild(c);
+    });
+
+    // Label chips (top 20 by frequency)
+    const labelsData = await get('/feed/labels');
+    const labelWrap = document.getElementById('feed-label-chips');
+    labelWrap.innerHTML = '';
+    labelsData.labels.slice(0, 20).forEach(l => {
+      const c = document.createElement('span');
+      c.className = 'filter-chip';
+      c.textContent = l.name;
+      c.title = `${l.count} posts`;
+      c.dataset.label = l.name;
+      c.onclick = () => toggleFeedLabel(l.name, c);
+      labelWrap.appendChild(c);
+    });
+
+    await feedLoadPosts(true);
+  } catch(e) {
+    document.getElementById('feed-loading').textContent = 'Error loading feed: ' + e.message;
+  }
+}
+
+function toggleFeedYear(y, chip) {
+  _feedYear = y;
+  document.querySelectorAll('#feed-year-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  feedLoadPosts(true);
+}
+
+function toggleFeedLabel(lbl, chip) {
+  if (_feedLabel === lbl) {
+    _feedLabel = '';
+    chip.classList.remove('active');
+  } else {
+    _feedLabel = lbl;
+    document.querySelectorAll('#feed-label-chips .filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  }
+  feedLoadPosts(true);
+}
+
+let _feedSearchTimer = null;
+function feedSearch(val) {
+  clearTimeout(_feedSearchTimer);
+  _feedSearchTimer = setTimeout(() => {
+    _feedSearch = val.trim();
+    feedLoadPosts(true);
+  }, 280);
+}
+
+async function feedLoadPosts(reset) {
+  if (reset) { _feedPage = 1; }
+  const params = new URLSearchParams({
+    page: _feedPage, search: _feedSearch, year: _feedYear, label: _feedLabel
+  });
+  const data = await get('/feed/posts?' + params);
+  const scroll = document.getElementById('feed-scroll');
+
+  if (reset) scroll.innerHTML = '';
+
+  if (data.posts.length === 0 && reset) {
+    scroll.innerHTML = '<div class="empty-state" style="padding:28px 14px;">No posts match.</div>';
+    document.getElementById('feed-count-bar').textContent = '0 posts';
+    document.getElementById('feed-match-count').textContent = '';
+    document.getElementById('feed-load-more').classList.add('hidden');
+    return;
+  }
+
+  data.posts.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'feed-item';
+    el.dataset.idx = p.idx;
+    const date = p.published ? p.published.substring(0, 10) : '';
+    const labels = p.labels.map(l => `<span class="feed-label-chip">${l}</span>`).join('');
+    el.innerHTML = `<div class="feed-item-title">${escHtml(p.title)}</div>
+      <div class="feed-item-meta"><span>${date}</span>${labels}</div>`;
+    el.onclick = () => feedSelectPost(p.idx, el);
+    scroll.appendChild(el);
+  });
+
+  _feedHasMore = data.has_more;
+  const loadMoreBtn = document.getElementById('feed-load-more');
+  loadMoreBtn.classList.toggle('hidden', !_feedHasMore);
+
+  const total = data.total;
+  document.getElementById('feed-count-bar').textContent =
+    total === data.per_page * data.page && _feedHasMore ? `Showing ${data.page * data.per_page} of ${total}` : `${total} post${total !== 1 ? 's' : ''}`;
+  document.getElementById('feed-match-count').textContent =
+    (_feedSearch || _feedYear || _feedLabel) ? `${total} match${total !== 1 ? 'es' : ''}` : '';
+}
+
+async function feedLoadMore() {
+  _feedPage++;
+  await feedLoadPosts(false);
+}
+
+async function feedSelectPost(idx, el) {
+  document.querySelectorAll('.feed-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+
+  document.getElementById('feed-empty-state').classList.add('hidden');
+  document.getElementById('feed-detail').classList.remove('hidden');
+
+  const p = await get('/feed/post/' + idx);
+
+  document.getElementById('feed-detail-title').textContent = p.title;
+  document.getElementById('feed-detail-date').textContent =
+    (p.published ? p.published.substring(0, 10) : '') +
+    (p.updated && p.updated !== p.published ? '  (updated ' + p.updated.substring(0, 10) + ')' : '');
+
+  const labelsEl = document.getElementById('feed-detail-labels');
+  labelsEl.innerHTML = p.labels.map(l => `<span class="feed-label-chip">${escHtml(l)}</span>`).join('');
+
+  _feedCurrentContent = p.content;
+  document.getElementById('feed-code-output').value = p.content;
+  setFeedMode(_feedMode);
+}
+
+function setFeedMode(mode) {
+  _feedMode = mode;
+  document.getElementById('feed-mode-preview-btn').classList.toggle('active', mode === 'preview');
+  document.getElementById('feed-mode-code-btn').classList.toggle('active', mode === 'code');
+  document.getElementById('feed-preview-wrap').classList.toggle('hidden', mode !== 'preview');
+  document.getElementById('feed-code-wrap').classList.toggle('hidden', mode !== 'code');
+  if (mode === 'preview' && _feedCurrentContent) {
+    const frame = document.getElementById('feed-preview-frame');
+    frame.srcdoc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;padding:20px;max-width:780px;margin:0 auto;line-height:1.6;}img{max-width:100%;height:auto;}</style></head><body>' + _feedCurrentContent + '</body></html>';
+  }
+}
+
+async function feedCopyCode(btn) {
+  const code = document.getElementById('feed-code-output').value;
+  if (!code) return;
+  try {
+    await navigator.clipboard.writeText(code);
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1800);
+  } catch(e) {
+    document.getElementById('feed-code-output').select();
+    document.execCommand('copy');
+  }
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 </script>
 <!-- ═══ GEMINI SETTINGS OVERLAY (global — accessible from any tab) ═══ -->
 <div id="gemini-setup-backdrop" class="hidden" onclick="toggleGeminiSettings()"

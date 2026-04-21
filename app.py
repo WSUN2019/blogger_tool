@@ -724,6 +724,129 @@ def blogger_bulk_reformat_one():
         return jsonify({'status': 'error', 'error': str(e)})
 
 
+# ---------------------------------------------------------------------------
+# Feed Review — blog_backup/feed.atom
+# ---------------------------------------------------------------------------
+
+FEED_FILE = os.path.join(BASE, 'blog_backup', 'feed.atom')
+_feed_cache = None
+
+
+def _parse_feed():
+    global _feed_cache
+    if _feed_cache is not None:
+        return _feed_cache
+    if not os.path.exists(FEED_FILE):
+        _feed_cache = []
+        return _feed_cache
+    import xml.etree.ElementTree as ET
+    import html as _html_lib
+    tree = ET.parse(FEED_FILE)
+    root = tree.getroot()
+    ns = {
+        'atom': 'http://www.w3.org/2005/Atom',
+        'blogger': 'http://schemas.google.com/blogger/2018',
+    }
+    posts = []
+    for entry in root.findall('atom:entry', ns):
+        btype = entry.find('blogger:type', ns)
+        if btype is None or btype.text != 'POST':
+            continue
+        title_el = entry.find('atom:title', ns)
+        title = title_el.text if title_el is not None else '(no title)'
+        content_el = entry.find('atom:content', ns)
+        content_raw = content_el.text if content_el is not None else ''
+        content_html = _html_lib.unescape(content_raw) if content_raw else ''
+        published_el = entry.find('atom:published', ns)
+        published = published_el.text if published_el is not None else ''
+        updated_el = entry.find('atom:updated', ns)
+        updated = updated_el.text if updated_el is not None else ''
+        status_el = entry.find('blogger:status', ns)
+        status = status_el.text if status_el is not None else ''
+        filename_el = entry.find('blogger:filename', ns)
+        filename = filename_el.text if filename_el is not None else ''
+        labels = [cat.get('term', '') for cat in entry.findall('atom:category', ns)
+                  if cat.get('term', '')]
+        posts.append({
+            'title': title,
+            'content': content_html,
+            'published': published,
+            'updated': updated,
+            'status': status,
+            'filename': filename,
+            'labels': labels,
+        })
+    posts.sort(key=lambda p: p['published'], reverse=True)
+    for i, p in enumerate(posts):
+        p['idx'] = i
+    _feed_cache = posts
+    return _feed_cache
+
+
+@app.route('/feed/status')
+@login_required
+def feed_status():
+    exists = os.path.exists(FEED_FILE)
+    count, years = 0, []
+    if exists:
+        posts = _parse_feed()
+        count = len(posts)
+        years = sorted({p['published'][:4] for p in posts if p['published']}, reverse=True)
+    return jsonify({'exists': exists, 'count': count, 'years': years})
+
+
+@app.route('/feed/labels')
+@login_required
+def feed_labels():
+    posts = _parse_feed()
+    counts = {}
+    for p in posts:
+        for lbl in p['labels']:
+            counts[lbl] = counts.get(lbl, 0) + 1
+    labels = sorted(counts.items(), key=lambda x: -x[1])
+    return jsonify({'labels': [{'name': n, 'count': c} for n, c in labels]})
+
+
+@app.route('/feed/posts')
+@login_required
+def feed_posts():
+    posts = _parse_feed()
+    search = request.args.get('search', '').strip().lower()
+    year   = request.args.get('year', '').strip()
+    label  = request.args.get('label', '').strip()
+    page   = max(1, int(request.args.get('page', 1)))
+    per_page = 40
+
+    filtered = posts
+    if search:
+        filtered = [p for p in filtered if search in p['title'].lower()]
+    if year:
+        filtered = [p for p in filtered if p['published'].startswith(year)]
+    if label:
+        filtered = [p for p in filtered if label in p['labels']]
+
+    total = len(filtered)
+    start = (page - 1) * per_page
+    items = filtered[start:start + per_page]
+    result = [{'idx': p['idx'], 'title': p['title'], 'published': p['published'],
+               'labels': p['labels'], 'status': p['status']} for p in items]
+    return jsonify({'posts': result, 'total': total, 'page': page, 'per_page': per_page,
+                    'has_more': start + per_page < total})
+
+
+@app.route('/feed/post/<int:idx>')
+@login_required
+def feed_get_post(idx):
+    posts = _parse_feed()
+    if idx < 0 or idx >= len(posts):
+        return jsonify({'error': 'Not found'}), 404
+    p = posts[idx]
+    return jsonify({'idx': idx, 'title': p['title'], 'published': p['published'],
+                    'updated': p['updated'], 'labels': p['labels'],
+                    'status': p['status'], 'filename': p['filename'],
+                    'content': p['content']})
+
+
 @app.route('/blogger/cleanup/fix-one', methods=['POST'])
 @login_required
 def blogger_cleanup_fix_one():
