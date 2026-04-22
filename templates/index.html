@@ -662,7 +662,10 @@ code {
     <!-- Page title -->
     <div style="padding:24px 0 16px;">
       <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Utilities</div>
-      <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--primary);">Post Tools</h2>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--primary);">Post Tools</h2>
+        <span id="util-blog-badge" class="badge badge-success hidden"><span class="bdot bdot-success"></span> <span id="util-blog-name"></span></span>
+      </div>
     </div>
 
     <!-- Single / Bulk mode toggle -->
@@ -996,19 +999,22 @@ code {
 ───────────────────────────────────────────── -->
 <div id="tab-feed" class="tab-pane">
   <h1 class="page-title">Backup Reviewer</h1>
-  <p class="page-desc">Browse your <code>blog_backup/feed.atom</code> — the XML backup exported from Blogger.com. Preview posts and copy raw HTML. Upload a new file anytime to replace it.</p>
+  <p class="page-desc">Browse backup <code>.atom</code> files in <code>blog_backup/</code> — exported from Blogger.com. Preview posts and copy raw HTML. Generate a fresh backup from Blogger anytime.</p>
 
-  <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-    <label class="btn btn-outline btn-sm" style="cursor:pointer;margin:0;">
-      ↑ Upload feed.atom
-      <input type="file" accept=".atom,.xml" style="display:none;" onchange="feedUpload(this)">
-    </label>
+  <div style="margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <button class="btn btn-outline btn-sm" onclick="feedGenerate(this)" style="margin:0;">⟳ Generate from Blogger</button>
     <span id="feed-upload-status" style="font-size:0.8rem;color:var(--muted);"></span>
+  </div>
+  <div style="margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+    <span style="font-size:0.82rem;color:var(--muted);">Backup file:</span>
+    <select id="feed-file-select" onchange="feedSelectFile(this.value)" style="font-size:0.82rem;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);max-width:320px;">
+      <option value="">— no files found —</option>
+    </select>
   </div>
 
   <div id="feed-loading" class="text-muted" style="margin-top:24px;">Loading feed…</div>
   <div id="feed-no-file" class="alert alert-info hidden">
-    No <code>feed.atom</code> found. Export your blog from Blogger.com (Settings → Back up content) then upload it above.
+    No backup files found in <code>blog_backup/</code>. Use <strong>Generate from Blogger</strong> or upload a <code>.atom</code> export (Blogger Settings → Back up content).
   </div>
 
   <div id="feed-ready" class="hidden">
@@ -1555,6 +1561,8 @@ async function loadBlog() {
     document.getElementById('blog-post-count').textContent = data.posts;
     document.getElementById('blog-info').classList.remove('hidden');
     document.getElementById('blog-no-config').classList.add('hidden');
+    document.getElementById('util-blog-name').textContent = data.name;
+    document.getElementById('util-blog-badge').classList.remove('hidden');
     document.getElementById('blogger-body').classList.remove('hidden');
     activeYear = '';
     activeBlogSearch = '';
@@ -2505,19 +2513,24 @@ let _feedCurrentContent = '';
 let _feedMode = 'preview';
 let _feedInitialized = false;
 
-async function feedUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
+
+async function feedGenerate(btn) {
+  if (!_configBlogUrl) {
+    document.getElementById('feed-upload-status').textContent = '✗ Set blog URL in Config tab first';
+    return;
+  }
+  if (!blogId) {
+    document.getElementById('feed-upload-status').textContent = '✗ Connect to Blogger in Blog Editor first';
+    return;
+  }
   const statusEl = document.getElementById('feed-upload-status');
-  statusEl.textContent = 'Uploading…';
-  const fd = new FormData();
-  fd.append('file', file);
+  btn.disabled = true;
+  statusEl.textContent = 'Generating… this may take a moment';
   try {
-    const resp = await fetch('/feed/upload', {method: 'POST', body: fd});
-    const r = await resp.json();
+    const r = await post('/feed/generate', {blog_id: blogId});
     if (r.error) { statusEl.textContent = '✗ ' + r.error; return; }
-    statusEl.textContent = `✓ Loaded — ${r.count} posts`;
-    // Reset and reload feed
+    statusEl.textContent = `✓ Generated — ${r.count} posts → ${r.filename}`;
+    _feedPopulateSelect(r.files || [], r.filename || '');
     _feedInitialized = false;
     _feedSearch = ''; _feedYear = ''; _feedLabel = '';
     const si = document.getElementById('feed-search-input');
@@ -2527,9 +2540,48 @@ async function feedUpload(input) {
     document.getElementById('feed-ready').classList.add('hidden');
     initFeed();
   } catch(e) {
-    statusEl.textContent = '✗ Upload failed';
+    statusEl.textContent = '✗ Generate failed';
+  } finally {
+    btn.disabled = false;
   }
-  input.value = '';
+}
+
+function _feedPopulateSelect(files, active) {
+  const sel = document.getElementById('feed-file-select');
+  if (!sel) return;
+  sel.innerHTML = '';
+  if (!files.length) {
+    sel.innerHTML = '<option value="">— no files found —</option>';
+    return;
+  }
+  files.forEach(fn => {
+    const opt = document.createElement('option');
+    opt.value = fn;
+    opt.textContent = fn;
+    if (fn === active) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+async function feedSelectFile(filename) {
+  if (!filename) return;
+  const statusEl = document.getElementById('feed-upload-status');
+  statusEl.textContent = 'Switching…';
+  try {
+    const r = await post('/feed/select', {filename});
+    if (r.error) { statusEl.textContent = '✗ ' + r.error; return; }
+    statusEl.textContent = '';
+    _feedInitialized = false;
+    _feedSearch = ''; _feedYear = ''; _feedLabel = '';
+    const si = document.getElementById('feed-search-input');
+    if (si) si.value = '';
+    document.getElementById('feed-loading').classList.remove('hidden');
+    document.getElementById('feed-no-file').classList.add('hidden');
+    document.getElementById('feed-ready').classList.add('hidden');
+    initFeed();
+  } catch(e) {
+    statusEl.textContent = '✗ Switch failed';
+  }
 }
 
 async function initFeed() {
@@ -2537,6 +2589,7 @@ async function initFeed() {
   _feedInitialized = true;
   try {
     const s = await get('/feed/status');
+    _feedPopulateSelect(s.files || [], s.file || '');
     document.getElementById('feed-loading').classList.add('hidden');
     if (!s.exists) {
       document.getElementById('feed-no-file').classList.remove('hidden');
@@ -2544,7 +2597,7 @@ async function initFeed() {
     }
     document.getElementById('feed-ready').classList.remove('hidden');
     document.getElementById('feed-summary').textContent =
-      `${s.count} posts found in feed.atom`;
+      `${s.count} posts — ${s.file}`;
 
     // Year chips
     const yearWrap = document.getElementById('feed-year-chips');
