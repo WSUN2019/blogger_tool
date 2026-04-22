@@ -469,7 +469,7 @@ code {
   <nav class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('blogger')" id="blogger-tab-btn">Blog Editor</button>
     <button class="tab-btn" onclick="switchTab('cleanup')">Utilities</button>
-    <button class="tab-btn" onclick="switchTab('feed')">Backup Reviewer</button>
+    <button class="tab-btn" onclick="switchTab('feed')">Backup Posts</button>
     <button class="tab-btn" onclick="switchTab('config')">Config</button>
     <button class="tab-btn" onclick="switchTab('about')">About</button>
   </nav>
@@ -998,8 +998,8 @@ code {
      TAB 4 · FEED REVIEW
 ───────────────────────────────────────────── -->
 <div id="tab-feed" class="tab-pane">
-  <h1 class="page-title">Backup Reviewer</h1>
-  <p class="page-desc">Browse backup <code>.atom</code> files in <code>blog_backup/</code> — exported from Blogger.com. Preview posts and copy raw HTML. Generate a fresh backup from Blogger anytime.</p>
+  <h1 class="page-title">Backup Posts</h1>
+  <p class="page-desc">Generate a full backup of your blog directly from Blogger. The backup saves as a dated <code>.atom</code> file (e.g. <code>myblog_20260421.atom</code>) in your local <code>blog_backup/</code> folder — nothing is sent anywhere. Browse posts, filter by year or label, and copy raw HTML anytime.</p>
 
   <div style="margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     <button class="btn btn-outline btn-sm" onclick="feedGenerate(this)" style="margin:0;">⟳ Generate from Blogger</button>
@@ -1144,8 +1144,8 @@ code {
             <td style="padding:9px 12px;color:var(--body-text);">Link Cleanup (remove stray tags across all posts) and Bulk Reformat + Images (AI reformat up to 10 at a time).</td>
           </tr>
           <tr>
-            <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Backup Reviewer</td>
-            <td style="padding:9px 12px;color:var(--body-text);">Upload your <code>feed.atom</code> Blogger export. Filter by year or label, preview posts, copy HTML.</td>
+            <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Backup Posts</td>
+            <td style="padding:9px 12px;color:var(--body-text);">Generate a full backup from Blogger and save it as a dated <code>.atom</code> file locally. Browse backups, filter by year or label, preview posts, copy HTML.</td>
           </tr>
         </tbody>
       </table>

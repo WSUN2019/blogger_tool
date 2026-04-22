@@ -27,8 +27,8 @@ OAuth connection to Blogger API v3. Browse posts by year, load HTML, reformat wi
 | **Link Cleanup** | Remove a stray HTML tag (e.g. a Google Fonts `<link>`) from every post in bulk |
 | **Bulk Reformat + Images** | Select posts → AI reformats + extracts images → pushes back up to 10 at a time |
 
-### Backup Reviewer
-Upload your `feed.atom` Blogger export (Settings → Back up content) to `blog_backup/`. Browse all posts, filter by year or label, preview HTML, copy to clipboard.
+### Backup Posts
+Generate a full backup of your blog directly from Blogger. Saves as a dated `.atom` file (e.g. `myblog_20260421.atom`) in the local `blog_backup/` folder — nothing is uploaded or sent anywhere. Switch between multiple backup files, filter by year or label, preview HTML, copy to clipboard.
 
 ### Post Versions (within Blog Editor)
 Click **💾 Save Version** on any open post to snapshot its HTML as an Atom entry in `blog_backup/versions/<post_id>.atom`. A versions panel shows all saved snapshots alongside the current live version — toggle between them with one click.
@@ -124,7 +124,7 @@ my_blogging_helper/
 │   ├── index.html          # Web app UI
 │   └── login.html
 ├── blog_backup/
-│   ├── feed.atom           # Blogger export (upload via Backup Reviewer)
+│   ├── myblog_YYYYMMDD.atom  # Generated backups (via Backup Posts tab)
 │   └── versions/           # Per-post version snapshots (<post_id>.atom)
 ├── html_input/             # CLI image extraction input
 ├── html_output/            # CLI image extraction output

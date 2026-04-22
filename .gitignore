@@ -6,8 +6,9 @@ config/gemini_model.txt
 config/auth.txt
 config/blog_url.txt
 
-# Blog backup & versions
-blog_backup/
+# Blog backup & versions (track folder, not contents)
+blog_backup/*
+!blog_backup/.gitkeep
 
 # Python
 __pycache__/
