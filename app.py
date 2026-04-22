@@ -40,6 +40,7 @@ CREDENTIALS_FILE = os.path.join(BASE, 'config', 'credentials.json')
 TOKEN_FILE = os.path.join(BASE, 'config', 'token.json')
 GEMINI_KEY_FILE = os.path.join(BASE, 'config', 'gemini_key.txt')
 GEMINI_MODEL_FILE = os.path.join(BASE, 'config', 'gemini_model.txt')
+BLOG_URL_FILE = os.path.join(BASE, 'config', 'blog_url.txt')
 SAMPLE_FILE = os.path.join(BASE, 'sample.txt')
 
 GEMINI_MODELS = [
@@ -384,6 +385,25 @@ def api_save_gemini_model():
     with open(GEMINI_MODEL_FILE, 'w') as f:
         f.write(model_id)
     return jsonify({'success': True, 'model': model_id})
+
+
+@app.route('/config/blog-url')
+@login_required
+def config_get_blog_url():
+    url = ''
+    if os.path.exists(BLOG_URL_FILE):
+        url = open(BLOG_URL_FILE).read().strip()
+    return jsonify({'url': url})
+
+
+@app.route('/config/blog-url', methods=['POST'])
+@login_required
+def config_save_blog_url():
+    url = (request.get_json() or {}).get('url', '').strip()
+    os.makedirs(os.path.dirname(BLOG_URL_FILE), exist_ok=True)
+    with open(BLOG_URL_FILE, 'w') as f:
+        f.write(url)
+    return jsonify({'success': True})
 
 
 @app.route('/api/save-gemini-key', methods=['POST'])
@@ -814,6 +834,17 @@ def versions_get(post_id, ts):
         if v['ts'] == ts:
             return jsonify(v)
     return jsonify({'error': 'Not found'}), 404
+
+
+@app.route('/versions/<post_id>/<ts>', methods=['DELETE'])
+@login_required
+def versions_delete(post_id, ts):
+    versions = _read_versions(post_id)
+    new_versions = [v for v in versions if v['ts'] != ts]
+    if len(new_versions) == len(versions):
+        return jsonify({'error': 'Not found'}), 404
+    _write_versions(post_id, new_versions)
+    return jsonify({'success': True, 'count': len(new_versions)})
 
 
 # ---------------------------------------------------------------------------

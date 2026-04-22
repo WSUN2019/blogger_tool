@@ -4,6 +4,10 @@ config/token.json
 config/gemini_key.txt
 config/gemini_model.txt
 config/auth.txt
+config/blog_url.txt
+
+# Blog backup & versions
+blog_backup/
 
 # Python
 __pycache__/

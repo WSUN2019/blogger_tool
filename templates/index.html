@@ -470,6 +470,7 @@ code {
     <button class="tab-btn active" onclick="switchTab('blogger')" id="blogger-tab-btn">Blog Editor</button>
     <button class="tab-btn" onclick="switchTab('cleanup')">Utilities</button>
     <button class="tab-btn" onclick="switchTab('feed')">Backup Reviewer</button>
+    <button class="tab-btn" onclick="switchTab('config')">Config</button>
     <button class="tab-btn" onclick="switchTab('about')">About</button>
   </nav>
   <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
@@ -541,16 +542,14 @@ code {
       <button class="btn btn-outline btn-sm" onclick="disconnectBlogger()">Disconnect</button>
     </div>
 
-    <!-- Blog loader -->
-    <div class="card mt-3" style="margin-top:14px;margin-bottom:16px;">
-      <label>Blog URL or Blog ID</label>
-      <div class="input-group">
-        <input type="text" id="blog-url-input" placeholder="https://yourblog.here.com  or  paste the numeric blog ID">
-        <button class="btn btn-primary" onclick="loadBlog(this)">Load Blog</button>
-      </div>
-      <div id="blog-info" class="hidden mt-2" style="margin-top:10px;">
-        <span class="badge"><span class="bdot"></span> <span id="blog-name-text"></span></span>
+    <!-- Blog info bar (auto-loaded from Config) -->
+    <div style="margin:14px 0 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div id="blog-info" class="hidden">
+        <span class="badge badge-success"><span class="bdot bdot-success"></span> <span id="blog-name-text"></span></span>
         <span class="text-muted" style="margin-left:8px;font-size:0.78rem;"><span id="blog-post-count"></span> posts</span>
+      </div>
+      <div id="blog-no-config" class="hidden">
+        <span class="alert alert-info" style="margin:0;display:inline-block;">No blog configured — go to the <button class="btn btn-outline btn-sm" onclick="switchTab('config')" style="padding:1px 8px;margin-left:4px;">Config</button> tab to set your blog URL.</span>
       </div>
     </div>
 
@@ -562,6 +561,10 @@ code {
         <div class="posts-panel-head">
           Posts
           <button class="btn btn-outline btn-sm btn-icon" onclick="loadPosts()" title="Refresh" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.7);padding:3px 7px;">↺</button>
+        </div>
+        <!-- Search -->
+        <div style="padding:8px 10px;border-bottom:1px solid var(--border);background:var(--warm);">
+          <input type="text" id="posts-search-input" placeholder="Search titles…" autocomplete="off" style="width:100%;padding:6px 10px;font-size:0.82rem;border:1px solid var(--border);border-radius:4px;background:white;" oninput="bloggerSearch(this.value)">
         </div>
         <!-- Year filter -->
         <div style="padding:8px 10px;border-bottom:1px solid var(--border);background:var(--warm);display:flex;flex-wrap:wrap;gap:5px;align-items:center;">
@@ -851,8 +854,8 @@ code {
           <div style="font-size:0.75rem;color:var(--muted);margin-top:6px;">Edit to match any tag or text you want stripped. Also matches without trailing <code>&lt;/link&gt;</code>.</div>
         </div>
 
-        <div style="display:flex;gap:10px;align-items:center;">
-          <input id="cleanup-blog-url" type="text" class="input" placeholder="https://yourblog.here.com" style="flex:1;" />
+        <div id="cleanup-no-config" class="alert alert-info hidden">No blog configured — set your blog URL in the <button class="btn btn-outline btn-sm" onclick="switchTab('config')" style="padding:1px 8px;margin-left:2px;">Config</button> tab first.</div>
+        <div id="cleanup-scan-btn-row">
           <button class="btn btn-primary" onclick="cleanupScan()">🔍 Scan All Posts</button>
         </div>
 
@@ -909,9 +912,9 @@ code {
           <strong>What this does:</strong> For each selected post — fetches the content, sends it through Gemini AI smart formatting, extracts and appends image links, then pushes the result back to Blogger. The original post is overwritten with the reformatted version.
         </div>
 
-        <!-- Blog URL + load -->
-        <div style="display:flex;gap:10px;align-items:center;">
-          <input id="bulk-blog-url" type="text" class="input" placeholder="https://yourblog.here.com" style="flex:1;" />
+        <!-- Load posts -->
+        <div id="bulk-no-config" class="alert alert-info hidden">No blog configured — set your blog URL in the <button class="btn btn-outline btn-sm" onclick="switchTab('config')" style="padding:1px 8px;margin-left:2px;">Config</button> tab first.</div>
+        <div id="bulk-load-btn-row">
           <button class="btn btn-primary" onclick="bulkLoadPosts()">Load Posts</button>
         </div>
 
@@ -1020,7 +1023,7 @@ code {
             <span id="feed-match-count" style="font-size:0.7rem;font-weight:400;opacity:0.7;"></span>
           </div>
           <div class="feed-search">
-            <input type="text" id="feed-search-input" placeholder="Search titles…" oninput="feedSearch(this.value)">
+            <input type="text" id="feed-search-input" placeholder="Search titles…" autocomplete="off" oninput="feedSearch(this.value)">
           </div>
           <div class="feed-filters">
             <div class="feed-filter-row">
@@ -1082,13 +1085,33 @@ code {
 </div><!-- /tab-feed -->
 
 <!-- ─────────────────────────────────────────
-     TAB 5 · ABOUT
+     TAB 5 · CONFIG
+───────────────────────────────────────────── -->
+<div id="tab-config" class="tab-pane">
+  <div style="max-width:560px;">
+    <h1 class="page-title">Config</h1>
+    <p class="page-desc">Settings that apply across all tabs. Set your blog URL once here and it will be used everywhere.</p>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Blog URL or Blog ID</div>
+      <p style="font-size:0.82rem;color:var(--body-text);margin-bottom:12px;line-height:1.5;">Used by Blog Editor, Link Cleanup, and Bulk Reformat. Enter your full blog URL or the numeric Blogger blog ID.</p>
+      <div class="input-group">
+        <input type="text" id="config-blog-url-input" placeholder="https://yourblog.here.com  or  numeric blog ID" autocomplete="off">
+        <button class="btn btn-primary" onclick="configSaveBlogUrl(this)">Save</button>
+      </div>
+      <div id="config-blog-url-status" style="font-size:0.8rem;margin-top:8px;min-height:1.2em;"></div>
+    </div>
+  </div>
+</div><!-- /tab-config -->
+
+<!-- ─────────────────────────────────────────
+     TAB 6 · ABOUT
 ───────────────────────────────────────────── -->
 <div id="tab-about" class="tab-pane">
   <div style="max-width:700px;">
 
     <h1 class="page-title">About</h1>
-    <p class="page-desc">A private local tool for writing, formatting, and managing posts on Blogger.com. Built with VS Code and Claude Code.</p>
+    <p class="page-desc">A private local tool for writing, formatting, and managing posts on Blogger.com. Runs on your machine — no data leaves except API calls to Google.</p>
 
     <!-- Features table -->
     <div class="card" style="margin-bottom:18px;">
@@ -1096,11 +1119,15 @@ code {
         <tbody>
           <tr style="border-bottom:1px solid var(--border);">
             <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Blog Editor</td>
-            <td style="padding:9px 12px;color:var(--body-text);">OAuth to Blogger API v3. Browse posts by year, load HTML, reformat with AI + images, save versions locally, push back live.</td>
+            <td style="padding:9px 12px;color:var(--body-text);">OAuth to Blogger API v3. Browse posts by year, load HTML, reformat with AI + images, push back live.</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Post Versions</td>
+            <td style="padding:9px 12px;color:var(--body-text);">Save local snapshots of any post (💾 Save Version). Toggle between live, saved versions, and a modified state indicator in the editor.</td>
           </tr>
           <tr style="border-bottom:1px solid var(--border);">
             <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Blog Formatter</td>
-            <td style="padding:9px 12px;color:var(--body-text);">Plain text → styled Blogger HTML. 7 themes. Smart Format uses Gemini AI to auto-structure sections, stats, lists and tables.</td>
+            <td style="padding:9px 12px;color:var(--body-text);">Plain text → styled Blogger HTML. 7 themes. Smart Format uses Gemini AI to auto-structure sections, stats, lists, and tables.</td>
           </tr>
           <tr style="border-bottom:1px solid var(--border);">
             <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Image Cleaner</td>
@@ -1112,7 +1139,7 @@ code {
           </tr>
           <tr>
             <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Backup Reviewer</td>
-            <td style="padding:9px 12px;color:var(--body-text);">Upload and browse your <code>feed.atom</code> Blogger export. Filter by year or label, preview posts, copy HTML.</td>
+            <td style="padding:9px 12px;color:var(--body-text);">Upload your <code>feed.atom</code> Blogger export. Filter by year or label, preview posts, copy HTML.</td>
           </tr>
         </tbody>
       </table>
@@ -1170,6 +1197,7 @@ let blogId = null;
 let nextPageToken = null;
 let activePostId = null;
 let activeYear = '';
+let activeBlogSearch = '';
 let _liveHtml = '';
 let _activeVersionTs = 'live';
 
@@ -1180,7 +1208,7 @@ function switchTab(name) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  const order = ['blogger', 'cleanup', 'feed', 'about'];
+  const order = ['blogger', 'cleanup', 'feed', 'config', 'about'];
   document.querySelectorAll('.tab-btn')[order.indexOf(name)].classList.add('active');
   if (name === 'feed') initFeed();
 }
@@ -1427,6 +1455,68 @@ async function loadSample() {
 }
 
 // ═══════════════════════════════════════════
+//  BLOG URL CONFIG
+// ═══════════════════════════════════════════
+let _configBlogUrl = '';
+
+async function loadBlogConfig() {
+  const r = await get('/config/blog-url');
+  _configBlogUrl = r.url || '';
+  const input = document.getElementById('config-blog-url-input');
+  if (input) input.value = _configBlogUrl;
+  _updateNoBlogMessages();
+  if (!_configBlogUrl) return;
+  const status = await get('/blogger/status');
+  if (status.connected) await loadBlog();
+}
+
+async function configSaveBlogUrl(btn) {
+  const url = document.getElementById('config-blog-url-input').value.trim();
+  if (!url) return;
+  setBtnLoading(btn, true);
+  try {
+    await post('/config/blog-url', {url});
+    _configBlogUrl = url;
+    document.getElementById('config-blog-url-status').textContent = '✓ Saved';
+    document.getElementById('config-blog-url-status').style.color = '#276749';
+    _updateNoBlogMessages();
+    const status = await get('/blogger/status');
+    if (status.connected) await loadBlog();
+    else toast('Blog URL saved. Connect to Google in Blog Editor to load posts.', 'success');
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+async function saveBlogUrlConfig(url) {
+  if (!url) return;
+  _configBlogUrl = url;
+  await post('/config/blog-url', {url});
+  const input = document.getElementById('config-blog-url-input');
+  if (input) input.value = url;
+}
+
+function _updateNoBlogMessages() {
+  const has = !!_configBlogUrl;
+  ['blog-no-config'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', has);
+  });
+  ['cleanup-no-config', 'cleanup-scan-btn-row'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id.endsWith('-no-config')) el.classList.toggle('hidden', has);
+    else el.classList.toggle('hidden', !has);
+  });
+  ['bulk-no-config', 'bulk-load-btn-row'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id.endsWith('-no-config')) el.classList.toggle('hidden', has);
+    else el.classList.toggle('hidden', !has);
+  });
+}
+
+// ═══════════════════════════════════════════
 //  BLOGGER CONNECT
 // ═══════════════════════════════════════════
 async function checkBloggerStatus() {
@@ -1446,24 +1536,34 @@ async function disconnectBlogger() {
   checkBloggerStatus();
 }
 
-async function loadBlog(btn) {
-  const raw = document.getElementById('blog-url-input').value.trim();
-  if (!raw) return;
-  setBtnLoading(btn, true);
+async function loadBlog() {
+  const raw = _configBlogUrl;
+  if (!raw) {
+    document.getElementById('blog-no-config').classList.remove('hidden');
+    document.getElementById('blog-info').classList.add('hidden');
+    document.getElementById('blogger-body').classList.add('hidden');
+    return;
+  }
   try {
     const param = /^\d+$/.test(raw) ? `id=${raw}` : `url=${encodeURIComponent(raw)}`;
     const data = await get(`/blogger/blog?${param}`);
     if (data.error) { toast(data.error, 'error'); return; }
     blogId = data.id;
+    _cleanupBlogId = data.id;
+    _bulkBlogId   = data.id;
     document.getElementById('blog-name-text').textContent = data.name;
     document.getElementById('blog-post-count').textContent = data.posts;
     document.getElementById('blog-info').classList.remove('hidden');
+    document.getElementById('blog-no-config').classList.add('hidden');
     document.getElementById('blogger-body').classList.remove('hidden');
     activeYear = '';
+    activeBlogSearch = '';
+    const si = document.getElementById('posts-search-input');
+    if (si) si.value = '';
     buildYearFilter();
     await loadPosts();
-  } finally {
-    setBtnLoading(btn, false);
+  } catch(e) {
+    toast('Failed to load blog: ' + e.message, 'error');
   }
 }
 
@@ -1487,12 +1587,31 @@ function buildYearFilter() {
   });
 }
 
+let _blogSearchTimer = null;
+let _loadPostsGen = 0;
+
+function bloggerSearch(val) {
+  activeBlogSearch = val.trim().toLowerCase();
+  document.querySelectorAll('#posts-scroll .post-item').forEach(el => {
+    const title = el.querySelector('.post-item-title')?.textContent.toLowerCase() || '';
+    el.style.display = (!activeBlogSearch || title.includes(activeBlogSearch)) ? '' : 'none';
+  });
+}
+
+function _postsQueryParams(pageToken) {
+  const p = new URLSearchParams({blog_id: blogId, orderBy: 'PUBLISHED'});
+  if (activeYear) p.set('year', activeYear);
+  if (pageToken) p.set('page_token', pageToken);
+  return p.toString();
+}
+
 async function loadPosts() {
   if (!blogId) return;
+  const gen = ++_loadPostsGen;
   const scroll = document.getElementById('posts-scroll');
   scroll.innerHTML = '<div class="empty-state" style="padding:28px 16px;">Loading…</div>';
-  const yearParam = activeYear ? `&year=${activeYear}` : '';
-  const data = await get(`/blogger/posts?blog_id=${blogId}${yearParam}`);
+  const data = await get(`/blogger/posts?${_postsQueryParams()}`);
+  if (gen !== _loadPostsGen) return;  // a newer call is already in flight — discard
   if (data.error) {
     scroll.innerHTML = `<div class="alert alert-error" style="margin:12px;">${data.error}</div>`;
     return;
@@ -1501,12 +1620,12 @@ async function loadPosts() {
   document.getElementById('posts-more').classList.toggle('hidden', !nextPageToken);
   scroll.innerHTML = '';
   appendPostItems(data.posts);
+  if (activeBlogSearch) bloggerSearch(activeBlogSearch);
 }
 
 async function loadMorePosts() {
   if (!nextPageToken || !blogId) return;
-  const yearParam = activeYear ? `&year=${activeYear}` : '';
-  const data = await get(`/blogger/posts?blog_id=${blogId}&page_token=${nextPageToken}${yearParam}`);
+  const data = await get(`/blogger/posts?${_postsQueryParams(nextPageToken)}`);
   nextPageToken = data.next_page_token;
   document.getElementById('posts-more').classList.toggle('hidden', !nextPageToken);
   appendPostItems(data.posts);
@@ -1805,6 +1924,7 @@ const _UTIL_BULK_TOOLS   = ['link-cleanup', 'bulk-reformat'];
 loadThemes();
 checkBloggerStatus();
 checkGeminiStatus();
+loadBlogConfig();
 showUtilMode('single');
 showUtil('formatter');
 
@@ -1835,19 +1955,14 @@ function cleanupResetTag() {
 }
 
 async function cleanupScan() {
-  const url = document.getElementById('cleanup-blog-url').value.trim();
-  if (!url) { toast('Enter your blog URL first', 'error'); return; }
+  if (!_cleanupBlogId) { toast('No blog configured — set your blog URL in Config tab', 'error'); return; }
 
   const status = document.getElementById('cleanup-status');
   document.getElementById('cleanup-results').classList.add('hidden');
   document.getElementById('cleanup-done').classList.add('hidden');
-  status.textContent = 'Fetching blog info…';
+  status.textContent = 'Scanning…';
 
   try {
-    const blog = await (await fetch('/blogger/blog?url=' + encodeURIComponent(url))).json();
-    if (blog.error) { status.textContent = 'Error: ' + blog.error; return; }
-    _cleanupBlogId = blog.id;
-    status.textContent = `Scanning "${blog.name}" (${blog.posts} posts)…`;
 
     const data = await post('/blogger/cleanup/scan', {blog_id: _cleanupBlogId, tag: _cleanupTag()});
     if (data.error) { status.textContent = 'Error: ' + data.error; return; }
@@ -2023,10 +2138,9 @@ let _bulkTheme = 'navy_gold';
 let _bulkActiveYear = '';
 
 async function bulkLoadPosts() {
-  const url = document.getElementById('bulk-blog-url').value.trim();
-  if (!url) { toast('Enter your blog URL first', 'error'); return; }
+  if (!_bulkBlogId) { toast('No blog configured — set your blog URL in Config tab', 'error'); return; }
   const status = document.getElementById('bulk-status');
-  status.textContent = 'Fetching blog info…';
+  status.textContent = 'Loading posts…';
   _bulkAllPosts = [];
   _bulkNextPageToken = null;
   document.getElementById('bulk-post-section').classList.add('hidden');
@@ -2034,11 +2148,8 @@ async function bulkLoadPosts() {
   document.getElementById('bulk-progress').classList.add('hidden');
 
   try {
-    const blog = await (await fetch('/blogger/blog?url=' + encodeURIComponent(url))).json();
-    if (blog.error) { status.textContent = 'Error: ' + blog.error; return; }
-    _bulkBlogId = blog.id;
     _bulkActiveYear = '';
-    status.textContent = `Loading posts from "${blog.name}"…`;
+    status.textContent = 'Loading posts…';
     await _bulkFetchPage();
     _bulkBuildYearFilter();
     _bulkRenderThemes();
@@ -2305,26 +2416,37 @@ async function loadVersions(postId) {
     r.versions.forEach(v => {
       const dt = v.ts.replace('T', ' ').replace('Z', ' UTC');
       const isActive = _activeVersionTs === v.ts;
-      const row = _makeVersionRow('💾 ' + dt, isActive, () => restoreVersion(postId, v.ts));
+      const row = _makeVersionRow('💾 ' + dt, isActive,
+        () => restoreVersion(postId, v.ts),
+        () => deleteVersion(postId, v.ts));
       list.appendChild(row);
     });
   } catch(e) { panel.classList.add('hidden'); }
 }
 
-function _makeVersionRow(label, isActive, onRestore) {
+function _makeVersionRow(label, isActive, onRestore, onDelete) {
   const row = document.createElement('div');
-  row.style.cssText = `display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border-radius:5px;border:1px solid ${isActive ? 'var(--accent)' : 'var(--border)'};background:${isActive ? 'var(--warm)' : 'var(--bg)'};`;
+  row.style.cssText = `display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:5px;border:1px solid ${isActive ? 'var(--accent)' : 'var(--border)'};background:${isActive ? 'var(--warm)' : 'var(--bg)'};`;
   const lbl = document.createElement('span');
-  lbl.style.cssText = `font-size:0.8rem;color:${isActive ? 'var(--primary)' : 'var(--body-text)'};font-weight:${isActive ? '700' : '400'};`;
+  lbl.style.cssText = `font-size:0.8rem;color:${isActive ? 'var(--primary)' : 'var(--body-text)'};font-weight:${isActive ? '700' : '400'};flex:1;`;
   lbl.textContent = label + (isActive ? ' ✓' : '');
-  const btn = document.createElement('button');
-  btn.className = 'btn btn-outline btn-sm';
-  btn.style.flexShrink = '0';
-  btn.textContent = isActive ? 'Current' : 'Load';
-  btn.disabled = isActive;
-  btn.onclick = onRestore;
   row.appendChild(lbl);
-  row.appendChild(btn);
+  const loadBtn = document.createElement('button');
+  loadBtn.className = 'btn btn-outline btn-sm';
+  loadBtn.style.flexShrink = '0';
+  loadBtn.textContent = isActive ? 'Current' : 'Load';
+  loadBtn.disabled = isActive;
+  loadBtn.onclick = onRestore;
+  row.appendChild(loadBtn);
+  if (onDelete) {
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-outline btn-sm';
+    delBtn.style.cssText = 'flex-shrink:0;color:#c53030;border-color:#fcc;';
+    delBtn.textContent = '✕';
+    delBtn.title = 'Delete this version';
+    delBtn.onclick = onDelete;
+    row.appendChild(delBtn);
+  }
   return row;
 }
 
@@ -2348,6 +2470,26 @@ async function restoreVersion(postId, ts) {
     toast('Version loaded — review before saving to Blogger', 'success');
   } catch(e) {
     toast('Load failed: ' + e.message, 'error');
+  }
+}
+
+async function deleteVersion(postId, ts) {
+  const dt = ts.replace('T', ' ').replace('Z', ' UTC');
+  if (!confirm(`Delete version saved at ${dt}?\n\nThis cannot be undone.`)) return;
+  try {
+    const resp = await fetch(`/versions/${postId}/${encodeURIComponent(ts)}`, {method: 'DELETE'});
+    const r = await resp.json();
+    if (r.error) { toast(r.error, 'error'); return; }
+    if (_activeVersionTs === ts) {
+      _activeVersionTs = 'live';
+      document.getElementById('post-html').value = _liveHtml;
+      refreshPostPreview();
+      updateVersionBadge();
+    }
+    await loadVersions(postId);
+    toast('Version deleted', 'success');
+  } catch(e) {
+    toast('Delete failed: ' + e.message, 'error');
   }
 }
 
@@ -2377,6 +2519,9 @@ async function feedUpload(input) {
     statusEl.textContent = `✓ Loaded — ${r.count} posts`;
     // Reset and reload feed
     _feedInitialized = false;
+    _feedSearch = ''; _feedYear = ''; _feedLabel = '';
+    const si = document.getElementById('feed-search-input');
+    if (si) si.value = '';
     document.getElementById('feed-loading').classList.remove('hidden');
     document.getElementById('feed-no-file').classList.add('hidden');
     document.getElementById('feed-ready').classList.add('hidden');
