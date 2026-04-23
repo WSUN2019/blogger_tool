@@ -444,6 +444,56 @@ code {
 @media (max-width: 860px) {
   .feed-body { grid-template-columns: 1fr; }
 }
+
+/* ────────────────────────────────────────────
+   MOBILE  (≤ 600px)
+──────────────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Header — icon only, scrollable tabs */
+  .app-header { padding: 0 10px; }
+  .app-logo { margin-right: 8px; }
+  .app-logo-text { display: none; }
+  .tab-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn { padding: 0 12px; font-size: 0.73rem; white-space: nowrap; }
+  /* Hide username, keep sign out */
+  .header-username { display: none; }
+
+  /* Layout */
+  .main { padding: 16px 12px 48px; }
+  .card { padding: 14px 15px; }
+  .page-title { font-size: 1.25rem; }
+
+  /* Blog editor sidebar */
+  .posts-scroll { max-height: 260px; }
+  .editor-toolbar { gap: 5px; }
+  .editor-toolbar .btn-sm { font-size: 0.7rem; padding: 4px 9px; }
+
+  /* Feed / Backup Posts */
+  .feed-scroll { max-height: 240px; }
+  .feed-preview-frame { min-height: 300px; }
+  .feed-code-wrap textarea { min-height: 300px; }
+
+  /* Formatter */
+  .formatter-left textarea { min-height: 200px; }
+  .preview-wrap { min-height: 260px; }
+
+  /* Setup card */
+  .setup-card { padding: 18px 15px; }
+
+  /* Toasts stay inside viewport */
+  .toast { right: 10px; left: 10px; right: 10px; font-size: 0.82rem; }
+
+  /* About table: stack label above description */
+  .about-table td { display: block; padding: 6px 10px !important; white-space: normal !important; }
+  .about-table tr { border-bottom: 1px solid var(--border); display: block; padding: 4px 0; }
+  .about-table td:first-child { padding-bottom: 2px !important; }
+}
 </style>
 </head>
 <body>
@@ -474,7 +524,7 @@ code {
     <button class="tab-btn" onclick="switchTab('about')">About</button>
   </nav>
   <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
-    <span style="font-size:0.72rem;color:rgba(255,255,255,0.35);letter-spacing:0.08em;">blogtester</span>
+    <span class="header-username" style="font-size:0.72rem;color:rgba(255,255,255,0.35);letter-spacing:0.08em;">blogtester</span>
     <a href="/logout" style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);text-decoration:none;border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:4px 10px;transition:color 0.15s;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">Sign Out</a>
   </div>
 </header>
@@ -1121,7 +1171,7 @@ code {
 
     <!-- Features table -->
     <div class="card" style="margin-bottom:18px;">
-      <table style="width:100%;border-collapse:collapse;font-size:0.84rem;line-height:1.55;">
+      <table class="about-table" style="width:100%;border-collapse:collapse;font-size:0.84rem;line-height:1.55;">
         <tbody>
           <tr style="border-bottom:1px solid var(--border);">
             <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Blog Editor</td>
