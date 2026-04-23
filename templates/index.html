@@ -353,6 +353,56 @@ code {
   #gemini-setup { width: 92vw !important; }
 }
 
+/* ── Theme Picker Popup ── */
+.theme-popup {
+  display: none;
+  position: absolute;
+  z-index: 400;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+  padding: 14px 16px;
+  min-width: 260px;
+}
+.theme-popup.open { display: block; }
+.theme-popup-title {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+}
+
+/* ── Nav Dropdown (Utilities) ── */
+.tab-dropdown { position: relative; display: flex; align-items: stretch; }
+.tab-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 0 0 7px 7px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.13);
+  z-index: 300;
+  min-width: 170px;
+  padding: 4px 0;
+  white-space: nowrap;
+}
+.tab-dropdown-menu.open { display: block; }
+.tab-dd-item {
+  display: block; width: 100%;
+  padding: 10px 18px;
+  text-align: left;
+  background: none; border: none;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.8rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--body-text);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+.tab-dd-item:hover { background: var(--warm); color: var(--primary); }
+.tab-dd-item.dd-active { color: var(--accent); background: var(--warm); }
+
 /* ────────────────────────────────────────────
    FEED REVIEW TAB
 ──────────────────────────────────────────── */
@@ -536,8 +586,14 @@ code {
   </div>
   <nav class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('blogger')" id="blogger-tab-btn">Blog Editor</button>
-    <button class="tab-btn" onclick="switchTab('cleanup')">Utilities</button>
-    <button class="tab-btn" onclick="switchTab('feed')">Backup Posts</button>
+    <div class="tab-dropdown" id="util-tab-dropdown">
+      <button class="tab-btn" onclick="toggleUtilDropdown(event)" id="util-tab-btn">Utilities ▾</button>
+      <div class="tab-dropdown-menu" id="util-dropdown-menu">
+        <button class="tab-dd-item" id="util-dd-single" onclick="utilDropdownGo('single')">Single Post</button>
+        <button class="tab-dd-item" id="util-dd-bulk"   onclick="utilDropdownGo('bulk')">Bulk Operations</button>
+        <button class="tab-dd-item" id="util-dd-backup" onclick="utilDropdownGo('backup')">Backup Posts</button>
+      </div>
+    </div>
     <button class="tab-btn" onclick="switchTab('config')">Config</button>
     <button class="tab-btn" onclick="switchTab('about')">About</button>
   </nav>
@@ -556,15 +612,23 @@ code {
      TAB 3 · BLOGGER CONNECT
 ───────────────────────────────────────────── -->
 <div id="tab-blogger" class="tab-pane active">
-  <h1 class="page-title">Blog Editor</h1>
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:24px 0 8px;">
+    <h1 style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--primary);margin:0;white-space:nowrap;">Blog Editor</h1>
+    <span id="blogger-disconnected-badge"><span class="badge"><span class="bdot bdot-error"></span> Not Connected</span></span>
+    <span id="blogger-connected-status" class="hidden" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="badge badge-success"><span class="bdot bdot-success"></span> Connected to Google</span>
+      <button class="btn btn-outline btn-sm" onclick="disconnectBlogger()">Disconnect</button>
+      <span id="blog-info" class="hidden" style="display:flex;align-items:center;gap:6px;">
+        <span class="badge badge-success"><span class="bdot bdot-success"></span> <span id="blog-name-text"></span></span>
+        <span class="text-muted" style="font-size:0.78rem;"><span id="blog-post-count"></span> posts</span>
+      </span>
+    </span>
+  </div>
   <p class="page-desc">Connect to your Blogger account via Google OAuth to pull post HTML, extract images, apply themes, and push changes back — all without leaving this tool.</p>
 
   <!-- ── NOT CONNECTED ── -->
   <div id="view-disconnected">
     <div class="setup-card">
-      <div class="flex gap-2 mb-2" style="align-items:center;">
-        <span class="badge"><span class="bdot bdot-error"></span> Not Connected</span>
-      </div>
       <h3 style="font-family:'Playfair Display',serif;color:var(--primary);margin:10px 0 6px;font-size:1.15rem;">One-time Google API setup</h3>
       <p class="text-muted" style="margin-bottom:4px;">You only need to do this once. After that, the token is stored locally.</p>
 
@@ -605,20 +669,8 @@ code {
 
   <!-- ── CONNECTED ── -->
   <div id="view-connected" class="hidden">
-    <div class="flex gap-2 mb-2" style="align-items:center;flex-wrap:wrap;">
-      <span class="badge badge-success"><span class="bdot bdot-success"></span> Connected to Google</span>
-      <button class="btn btn-outline btn-sm" onclick="disconnectBlogger()">Disconnect</button>
-    </div>
-
-    <!-- Blog info bar (auto-loaded from Config) -->
-    <div style="margin:14px 0 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <div id="blog-info" class="hidden">
-        <span class="badge badge-success"><span class="bdot bdot-success"></span> <span id="blog-name-text"></span></span>
-        <span class="text-muted" style="margin-left:8px;font-size:0.78rem;"><span id="blog-post-count"></span> posts</span>
-      </div>
-      <div id="blog-no-config" class="hidden">
-        <span class="alert alert-info" style="margin:0;display:inline-block;">No blog configured — go to the <button class="btn btn-outline btn-sm" onclick="switchTab('config')" style="padding:1px 8px;margin-left:4px;">Config</button> tab to set your blog URL.</span>
-      </div>
+    <div id="blog-no-config" class="hidden" style="margin-bottom:12px;">
+      <span class="alert alert-info" style="margin:0;display:inline-block;">No blog configured — go to the <button class="btn btn-outline btn-sm" onclick="switchTab('config')" style="padding:1px 8px;margin-left:4px;">Config</button> tab to set your blog URL.</span>
     </div>
 
     <!-- Posts + Editor (shown after blog loads) -->
@@ -671,8 +723,7 @@ code {
           <div class="card" style="padding:12px 16px;">
             <div class="editor-toolbar">
               <button class="btn btn-primary btn-sm" onclick="reformatAndExtract(this)" title="Format post with active theme, extract images, and append them at the end — all in one step">⚡ Reformat + Images</button>
-              <button class="btn btn-outline btn-sm" onclick="extractFromPost(this)">⊞ Extract Images</button>
-              <button class="btn btn-outline btn-sm" onclick="sendToFormatter()">◑ Format with Theme</button>
+              <button class="btn btn-outline btn-sm" onclick="openThemePopup(event)" id="theme-popup-btn">◑ Format with Theme</button>
               <button class="btn btn-outline btn-sm btn-icon" onclick="toggleGeminiSettings()" title="Gemini API key &amp; model settings">⚙</button>
               <div class="spacer"></div>
               <button class="btn btn-outline btn-sm" onclick="saveVersion(this)" title="Save a local backup of the current HTML to blog_backup/versions/">💾 Save Version</button>
@@ -727,25 +778,19 @@ code {
 <div id="tab-cleanup" class="tab-pane">
   <div style="max-width:860px;margin:0 auto;">
 
-    <!-- Page title -->
+    <!-- Page title + mode selector -->
     <div style="padding:24px 0 16px;">
       <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;">Utilities</div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--primary);">Post Tools</h2>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--primary);margin:0;">Post Tools</h2>
         <span id="util-blog-badge" class="badge badge-success hidden"><span class="bdot bdot-success"></span> <span id="util-blog-name"></span></span>
+        <select id="util-mode-select" onchange="showUtilMode(this.value)"
+          style="padding:7px 12px;font-size:0.82rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border:2px solid var(--border);border-radius:8px;background:white;color:var(--primary);cursor:pointer;appearance:auto;font-family:'Lato',sans-serif;margin-left:auto;">
+          <option value="single">Single Post</option>
+          <option value="bulk">Bulk Operations</option>
+          <option value="backup">Backup Posts</option>
+        </select>
       </div>
-    </div>
-
-    <!-- Single / Bulk mode toggle -->
-    <div style="display:flex;gap:0;margin-bottom:24px;border:2px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content;">
-      <button id="util-mode-btn-single" onclick="showUtilMode('single')"
-        style="padding:9px 28px;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:var(--primary);color:white;cursor:pointer;">
-        Single Post
-      </button>
-      <button id="util-mode-btn-bulk" onclick="showUtilMode('bulk')"
-        style="padding:9px 28px;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:none;background:white;color:var(--muted);cursor:pointer;">
-        Bulk Operations
-      </button>
     </div>
 
     <!-- ══ SINGLE MODE ══ -->
@@ -1069,15 +1114,14 @@ code {
   <h1 class="page-title">Backup Posts</h1>
   <p class="page-desc">Generate a full backup of your blog directly from Blogger. The backup saves as a dated <code>.atom</code> file (e.g. <code>myblog_20260421.atom</code>) in your local <code>blog_backup/</code> folder — nothing is sent anywhere. Browse posts, filter by year or label, and copy raw HTML anytime.</p>
 
-  <div style="margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+  <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     <button class="btn btn-outline btn-sm" onclick="feedGenerate(this)" style="margin:0;">⟳ Generate from Blogger</button>
-    <span id="feed-upload-status" style="font-size:0.8rem;color:var(--muted);"></span>
-  </div>
-  <div style="margin-bottom:16px;display:flex;align-items:center;gap:8px;">
     <span style="font-size:0.82rem;color:var(--muted);">Backup file:</span>
-    <select id="feed-file-select" onchange="feedSelectFile(this.value)" style="font-size:0.82rem;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);max-width:320px;">
+    <select id="feed-file-select" onchange="feedSelectFile(this.value)" style="font-size:0.82rem;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);max-width:280px;">
       <option value="">— no files found —</option>
     </select>
+    <span id="feed-summary" style="font-size:0.8rem;color:var(--muted);"></span>
+    <span id="feed-upload-status" style="font-size:0.8rem;color:var(--muted);"></span>
   </div>
 
   <div id="feed-loading" class="text-muted" style="margin-top:24px;">Loading feed…</div>
@@ -1086,8 +1130,6 @@ code {
   </div>
 
   <div id="feed-ready" class="hidden">
-    <div id="feed-summary" class="text-muted" style="font-size:0.82rem;margin-bottom:0;"></div>
-
     <div class="feed-body">
       <!-- ── Left: post list ── -->
       <div>
@@ -1187,41 +1229,89 @@ code {
     <h1 class="page-title">About</h1>
     <p class="page-desc">A private local tool for writing, formatting, and managing posts on Blogger.com. Runs on your machine — no data leaves except API calls to Google.</p>
 
-    <!-- Features table -->
-    <div class="card" style="margin-bottom:18px;">
+    <!-- Blog Editor -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Blog Editor</div>
       <table class="about-table" style="width:100%;border-collapse:collapse;font-size:0.84rem;line-height:1.55;">
         <tbody>
           <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Blog Editor</td>
-            <td style="padding:9px 12px;color:var(--body-text);">OAuth to Blogger API v3. Browse posts by year, load HTML, reformat with AI + images, push back live.</td>
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Browse &amp; Edit</td>
+            <td style="padding:8px 12px;color:var(--body-text);">Connect via Google OAuth. Browse posts by year, search by title, load HTML, edit, and push changes back to Blogger.</td>
           </tr>
           <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Post Versions</td>
-            <td style="padding:9px 12px;color:var(--body-text);">Save local snapshots of any post (💾 Save Version). Toggle between live, saved versions, and a modified state indicator in the editor.</td>
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Reformat + Images</td>
+            <td style="padding:8px 12px;color:var(--body-text);">One-click: AI smart-formats the post with the active theme, extracts images, and appends them at the end.</td>
           </tr>
           <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Blog Formatter</td>
-            <td style="padding:9px 12px;color:var(--body-text);">Plain text → styled Blogger HTML. 7 themes. Smart Format uses Gemini AI to auto-structure sections, stats, lists, and tables.</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Image Cleaner</td>
-            <td style="padding:9px 12px;color:var(--body-text);">Extracts <code>&lt;a&gt;&lt;img&gt;</code> blocks from Blogger HTML, strips float/margin styles, previews thumbnails.</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Bulk Operations</td>
-            <td style="padding:9px 12px;color:var(--body-text);">Link Cleanup (remove stray tags across all posts) and Bulk Reformat + Images (AI reformat up to 10 at a time).</td>
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Format with Theme</td>
+            <td style="padding:8px 12px;color:var(--body-text);">Pick a color theme from a popup and re-render the post HTML in place — no page change needed.</td>
           </tr>
           <tr>
-            <td style="padding:9px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Backup Posts</td>
-            <td style="padding:9px 12px;color:var(--body-text);">Generate a full backup from Blogger and save it as a dated <code>.atom</code> file locally. Browse backups, filter by year or label, preview posts, copy HTML.</td>
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Post Versions</td>
+            <td style="padding:8px 12px;color:var(--body-text);">Save snapshots of any post (💾 Save Version). Toggle between the live version and saved snapshots. A badge shows live / modified / version state.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Utilities → Single Post -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Utilities — Single Post</div>
+      <table class="about-table" style="width:100%;border-collapse:collapse;font-size:0.84rem;line-height:1.55;">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Blog Formatter</td>
+            <td style="padding:8px 12px;color:var(--body-text);">Paste plain text or markdown, choose a theme, and get fully styled Blogger-ready HTML with inlined CSS.</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Smart Format (AI)</td>
+            <td style="padding:8px 12px;color:var(--body-text);">Sends your text to Google Gemini to auto-structure sections, KPI stats, lists, and tables before rendering.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Image Cleaner</td>
+            <td style="padding:8px 12px;color:var(--body-text);">Paste Blogger HTML — extracts all <code>&lt;a&gt;&lt;img&gt;</code> blocks and strips float/margin styles.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Utilities → Bulk -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Utilities — Bulk Operations</div>
+      <table class="about-table" style="width:100%;border-collapse:collapse;font-size:0.84rem;line-height:1.55;">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Link Cleanup</td>
+            <td style="padding:8px 12px;color:var(--body-text);">Scan all posts and remove a stray HTML tag (e.g. a Google Fonts <code>&lt;link&gt;</code>) in bulk.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Bulk Reformat</td>
+            <td style="padding:8px 12px;color:var(--body-text);">AI-reformat + extract images across multiple posts, 10 at a time, and push results back to Blogger.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Utilities → Backup Posts -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">Utilities — Backup Posts</div>
+      <table class="about-table" style="width:100%;border-collapse:collapse;font-size:0.84rem;line-height:1.55;">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Generate Backup</td>
+            <td style="padding:8px 12px;color:var(--body-text);">Pulls all posts from Blogger API and saves them as a dated <code>.atom</code> file (e.g. <code>myblog_20260421.atom</code>) in <code>blog_backup/</code>. Nothing leaves your machine.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;font-weight:700;color:var(--primary);white-space:nowrap;">Browse Backups</td>
+            <td style="padding:8px 12px;color:var(--body-text);">Switch between saved backup files. Filter by year or label, preview post HTML, copy to clipboard.</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <!-- Formatter syntax -->
-    <div class="card" style="margin-bottom:18px;">
-      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Formatter Input Syntax</div>
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Formatter Input Syntax</div>
       <pre style="background:var(--warm);border:1px solid var(--border);border-radius:5px;padding:14px;font-size:0.79rem;line-height:1.7;overflow-x:auto;color:var(--body-text);white-space:pre-wrap;margin:0;">TITLE: My Post Title
 SUBTITLE: Optional italic subtitle
 EYEBROW: Travel Journal
@@ -1261,6 +1351,12 @@ FOOTER: Thanks for reading.</pre>
 
 </main>
 
+<!-- Theme picker popup (Blog Editor) -->
+<div id="theme-popup" class="theme-popup">
+  <div class="theme-popup-title">Choose Theme</div>
+  <div id="theme-popup-row" class="theme-row"></div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════
 //  STATE
@@ -1282,10 +1378,37 @@ function switchTab(name) {
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  const order = ['blogger', 'cleanup', 'feed', 'config', 'about'];
-  document.querySelectorAll('.tab-btn')[order.indexOf(name)].classList.add('active');
+  // 'feed' lives under the Utilities dropdown — highlight that btn
+  const btnMap = {blogger: 0, cleanup: 1, feed: 1, config: 2, about: 3};
+  const idx = btnMap[name];
+  if (idx !== undefined) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
   if (name === 'feed') initFeed();
 }
+
+function toggleUtilDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('util-dropdown-menu').classList.toggle('open');
+}
+
+function utilDropdownGo(mode) {
+  const menu = document.getElementById('util-dropdown-menu');
+  menu.classList.remove('open');
+  // Update active item highlight
+  ['single','bulk','backup'].forEach(m => {
+    document.getElementById('util-dd-' + m).classList.toggle('dd-active', m === mode);
+  });
+  if (mode === 'backup') {
+    switchTab('feed');
+  } else {
+    switchTab('cleanup');
+    showUtilMode(mode);
+  }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', () => {
+  document.getElementById('util-dropdown-menu')?.classList.remove('open');
+});
 
 // ═══════════════════════════════════════════
 //  IMAGE CLEANER
@@ -1597,6 +1720,8 @@ async function checkBloggerStatus() {
   const data = await get('/blogger/status');
   document.getElementById('view-disconnected').classList.toggle('hidden', data.connected);
   document.getElementById('view-connected').classList.toggle('hidden', !data.connected);
+  document.getElementById('blogger-connected-status').classList.toggle('hidden', !data.connected);
+  document.getElementById('blogger-disconnected-badge').classList.toggle('hidden', data.connected);
   if (!data.connected && !data.has_credentials) {
     document.getElementById('no-creds-alert').classList.remove('hidden');
   }
@@ -1776,12 +1901,58 @@ function refreshPostPreview() {
     document.getElementById('post-html').value || '';
 }
 
-function sendToFormatter() {
-  const html = document.getElementById('post-html').value;
-  document.getElementById('formatter-input').value = html;
-  switchTab('formatter');
-  formatPost();
+function openThemePopup(e) {
+  e.stopPropagation();
+  const popup = document.getElementById('theme-popup');
+  const btn   = document.getElementById('theme-popup-btn');
+  const row   = document.getElementById('theme-popup-row');
+
+  // Populate theme buttons
+  row.innerHTML = '';
+  themes.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'theme-btn' + (t.key === activeTheme ? ' active' : '');
+    b.dataset.key = t.key;
+    const label = t.name.split(' (')[0];
+    b.innerHTML = `<div class="theme-dots"><span style="background:${t.primary}"></span><span style="background:${t.accent}"></span></div>${label}`;
+    b.onclick = () => applyThemeToPost(t.key);
+    row.appendChild(b);
+  });
+
+  // Position below the button
+  const rect = btn.getBoundingClientRect();
+  popup.style.top  = (rect.bottom + window.scrollY + 6) + 'px';
+  popup.style.left = (rect.left  + window.scrollX) + 'px';
+  popup.classList.toggle('open');
 }
+
+async function applyThemeToPost(themeKey) {
+  document.getElementById('theme-popup').classList.remove('open');
+  activeTheme = themeKey;
+  document.querySelectorAll('.theme-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.key === themeKey));
+
+  const html = document.getElementById('post-html').value.trim();
+  if (!html) return;
+  const btn = document.getElementById('theme-popup-btn');
+  setBtnLoading(btn, true);
+  try {
+    const data = await post('/api/format', {text: html, theme: themeKey});
+    document.getElementById('post-html').value = data.html;
+    refreshPostPreview();
+    updateVersionBadge();
+    toast('Theme applied: ' + themeKey.replace('_', ' '), 'success');
+  } catch(e) {
+    toast('Format failed', 'error');
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+// Close theme popup on outside click
+document.addEventListener('click', () => {
+  document.getElementById('theme-popup')?.classList.remove('open');
+});
 
 async function reformatAndExtract(btn) {
   const rawHtml = document.getElementById('post-html').value.trim();
@@ -2174,15 +2345,12 @@ async function cleanupFixBatch(limit) {
 //  UTILITIES SUB-NAV
 // ═══════════════════════════════════════════
 function showUtilMode(mode) {
+  if (mode === 'backup') { utilDropdownGo('backup'); return; }
   const isSingle = mode === 'single';
   document.getElementById('util-mode-single').style.display = isSingle ? '' : 'none';
   document.getElementById('util-mode-bulk').style.display   = isSingle ? 'none' : '';
-  const btnSingle = document.getElementById('util-mode-btn-single');
-  const btnBulk   = document.getElementById('util-mode-btn-bulk');
-  btnSingle.style.background = isSingle ? 'var(--primary)' : 'white';
-  btnSingle.style.color      = isSingle ? 'white' : 'var(--muted)';
-  btnBulk.style.background   = isSingle ? 'white' : 'var(--primary)';
-  btnBulk.style.color        = isSingle ? 'var(--muted)' : 'white';
+  const sel = document.getElementById('util-mode-select');
+  if (sel) sel.value = mode;
 }
 
 function showUtil(name) {
@@ -2664,8 +2832,7 @@ async function initFeed() {
       return;
     }
     document.getElementById('feed-ready').classList.remove('hidden');
-    document.getElementById('feed-summary').textContent =
-      `${s.count} posts — ${s.file}`;
+    document.getElementById('feed-summary').textContent = `${s.count} posts`;
 
     // Year chips
     const yearWrap = document.getElementById('feed-year-chips');
