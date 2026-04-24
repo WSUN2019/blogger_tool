@@ -173,6 +173,22 @@ def _html_to_plain(html: str) -> str:
     return '\n\n'.join(out)
 
 
+def _place_images(html: str, img_tags: list) -> str:
+    """Place first image after section I, remaining at end. Single image goes at end."""
+    if not img_tags:
+        return html
+    if len(img_tags) == 1:
+        return html + '\n' + img_tags[0]
+    first_img, rest = img_tags[0], img_tags[1:]
+    idx = html.find('</section>')
+    if idx != -1:
+        pos = idx + len('</section>')
+        html = html[:pos] + '\n' + first_img + html[pos:]
+    else:
+        html = first_img + '\n' + html
+    return html + '\n' + '\n'.join(rest)
+
+
 def _auto_inject_title(text: str) -> str:
     """If no TITLE: line present, promote the first non-empty line as the title."""
     if re.search(r'^TITLE\s*:', text, re.MULTILINE | re.IGNORECASE):

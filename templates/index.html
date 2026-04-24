@@ -146,6 +146,7 @@ textarea:focus, input[type=text]:focus { outline: none; border-color: var(--acce
 .btn-accent:hover { background: #d4b05c; }
 .btn-ai { background: #2563eb; color: white; }
 .btn-ai:hover { background: #1d4ed8; }
+.btn-ai.active { background: #1d4ed8; }
 .btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 .btn-outline:hover { background: var(--warm); color: var(--body-text); }
 .btn-outline.active { background: var(--warm); color: var(--primary); border-color: var(--primary); }
@@ -718,29 +719,28 @@ code {
         </div>
 
         <div id="post-editor" class="editor-panel hidden">
-          <!-- Title bar -->
-          <div class="card" style="padding:14px 18px;">
-            <div class="flex gap-2" style="align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-              <h3 id="post-editor-title" contenteditable="true" spellcheck="false" data-placeholder="Post title…" style="font-family:'Playfair Display',serif;color:var(--primary);font-size:1.1rem;flex:1;line-height:1.3;min-width:0;outline:none;cursor:text;border-bottom:1px dashed transparent;transition:border-color 0.15s;" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'"></h3>
-              <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-                <span id="version-status-badge" style="display:none;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;padding:3px 10px;border-radius:12px;white-space:nowrap;"></span>
-                <a id="post-view-link" href="#" target="_blank" class="btn btn-outline btn-sm">View ↗</a>
-              </div>
-            </div>
-            <div id="post-labels-row" class="hidden" style="margin-top:8px;"></div>
-          </div>
-
           <!-- Toolbar -->
           <div class="card" style="padding:12px 16px;">
             <div class="editor-toolbar">
-              <button class="btn btn-ai btn-sm" onclick="reformatAndExtract(this)" title="Format post with active theme, extract images, and append them at the end — all in one step">⚡ AI Reformat + Images</button>
-              <button class="btn btn-outline btn-sm" onclick="openThemePopup(event)" id="theme-popup-btn">◑ Format with Theme</button>
               <button class="btn btn-ai btn-sm" onclick="blogWrite(this)" title="Write or rewrite this post in the Modern Simple Living voice using Gemini">✍ AI Blog Write</button>
+              <button id="reformat-toggle-btn" class="btn btn-outline btn-sm" onclick="toggleReformatPanel()" title="Choose theme and reformat this post">⚡ AI Reformat Post</button>
               <button class="btn btn-outline btn-sm btn-icon" onclick="toggleGeminiSettings()" title="Gemini API key &amp; model settings">⚙</button>
               <div class="spacer"></div>
               <button id="versions-toggle-btn" class="btn btn-outline btn-sm" onclick="toggleVersionsPanel()" title="Show saved versions">📋 Versions</button>
-              <button id="delete-post-btn" class="btn btn-outline btn-sm" onclick="deletePost(this)" style="color:#c53030;border-color:#c53030;display:none;" title="Permanently delete this post from Blogger">🗑 Delete</button>
               <button class="btn btn-accent btn-sm" onclick="savePost(this)">↑ Save to Blogger</button>
+            </div>
+          </div>
+
+          <!-- Reformat panel -->
+          <div id="reformat-panel" class="card hidden" style="padding:12px 16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);">Format with Theme</span>
+              <button class="btn btn-outline btn-sm" onclick="toggleReformatPanel()" style="padding:2px 9px;" title="Close">✕</button>
+            </div>
+            <div id="reformat-theme-row" class="theme-row" style="margin-bottom:14px;"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-ai btn-sm" onclick="runAiReformat(this)" title="Use Gemini to smart-format, then extract and append images">⚡ AI Reformat + Images</button>
+              <button id="apply-theme-btn" class="btn btn-outline btn-sm" onclick="applyThemeToPost(activeTheme, this)" title="Apply the selected theme without AI">◑ Apply Theme</button>
             </div>
           </div>
 
@@ -754,6 +754,19 @@ code {
               </div>
             </div>
             <div id="versions-list" style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;"></div>
+          </div>
+
+          <!-- Title bar -->
+          <div class="card" style="padding:14px 18px;">
+            <div class="flex gap-2" style="align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <h3 id="post-editor-title" contenteditable="true" spellcheck="false" data-placeholder="Post title…" style="font-family:'Playfair Display',serif;color:var(--primary);font-size:1.1rem;flex:1;line-height:1.3;min-width:0;outline:none;cursor:text;border-bottom:1px dashed transparent;transition:border-color 0.15s;" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'"></h3>
+              <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                <button id="delete-post-btn" class="btn btn-outline btn-sm btn-icon" onclick="deletePost(this)" style="color:#c53030;border-color:#c53030;display:none;" title="Permanently delete this post from Blogger">🗑</button>
+                <span id="version-status-badge" style="display:none;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;padding:3px 10px;border-radius:12px;white-space:nowrap;"></span>
+                <a id="post-view-link" href="#" target="_blank" class="btn btn-outline btn-sm">View ↗</a>
+              </div>
+            </div>
+            <div id="post-labels-row" class="hidden" style="margin-top:8px;"></div>
           </div>
 
           <!-- Post HTML -->
@@ -1236,6 +1249,41 @@ code {
     <p class="page-desc">Settings that apply across all tabs. Set your blog URL once here and it will be used everywhere.</p>
 
     <div class="card" style="margin-bottom:18px;">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Blogger Connection</div>
+
+      <!-- Connected -->
+      <div id="config-blogger-connected" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="badge badge-success"><span class="bdot bdot-success"></span> Connected to Google</span>
+          <button class="btn btn-outline btn-sm" onclick="disconnectBlogger()">Disconnect</button>
+        </div>
+      </div>
+
+      <!-- Disconnected -->
+      <div id="config-blogger-disconnected">
+        <div style="margin-bottom:12px;"><span class="badge"><span class="bdot bdot-error"></span> Not Connected</span></div>
+        <ol class="setup-steps">
+          <li><span class="step-num">1</span><span>Go to <strong>console.cloud.google.com</strong> → create a project → search <strong>Blogger API v3</strong> and enable it.</span></li>
+          <li><span class="step-num">2</span><span>Under <em>Credentials</em>, create <strong>OAuth 2.0 Client ID</strong> (type: Web application). Add <code>http://localhost:5000/blogger/callback</code> as an authorized redirect URI.</span></li>
+          <li><span class="step-num">3</span><span>Download the JSON file and save it as <code>config/credentials.json</code> inside the <strong>blogger_tool</strong> folder.</span></li>
+          <li><span class="step-num">4</span><span>Click <strong>Connect with Google</strong> below.</span></li>
+        </ol>
+        <div id="config-no-creds-alert" class="alert alert-error hidden" style="margin-bottom:10px;">
+          <strong>config/credentials.json not found.</strong> Complete steps 1–3 first, then refresh this page.
+        </div>
+        <a href="/blogger/auth" class="btn btn-primary" style="margin-top:4px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+            <path d="M21.6 12.2c0-.7-.06-1.36-.18-2H12v3.79h5.41c-.23 1.22-.95 2.26-2.02 2.95v2.45h3.27C20.6 17.61 21.6 15.07 21.6 12.2z" fill="#4285F4"/>
+            <path d="M12 22c2.7 0 4.96-.9 6.61-2.42l-3.27-2.53c-.9.6-2.05.96-3.34.96-2.57 0-4.74-1.74-5.52-4.07H3.16v2.62C4.8 19.76 8.17 22 12 22z" fill="#34A853"/>
+            <path d="M6.48 13.94A5.85 5.85 0 016.16 12c0-.67.12-1.32.32-1.94V7.44H3.16A9.99 9.99 0 002 12c0 1.61.38 3.14 1.16 4.56l3.32-2.62z" fill="#FBBC05"/>
+            <path d="M12 6.06c1.46 0 2.77.5 3.8 1.5l2.85-2.85C16.95 3.07 14.69 2 12 2 8.17 2 4.8 4.24 3.16 7.44l3.32 2.62C7.26 7.8 9.43 6.06 12 6.06z" fill="#EA4335"/>
+          </svg>
+          Connect with Google
+        </a>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
       <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Blog URL or Blog ID</div>
       <p style="font-size:0.82rem;color:var(--body-text);margin-bottom:12px;line-height:1.5;">Used by Blog Editor, Link Cleanup, and Bulk Reformat. Enter your full blog URL or the numeric Blogger blog ID.</p>
       <div class="input-group">
@@ -1243,6 +1291,26 @@ code {
         <button class="btn btn-primary" onclick="configSaveBlogUrl(this)">Save</button>
       </div>
       <div id="config-blog-url-status" style="font-size:0.8rem;margin-top:8px;min-height:1.2em;"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Gemini API</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+        <div>
+          <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">API Key</div>
+          <p style="font-size:0.82rem;color:var(--body-text);margin-bottom:9px;line-height:1.5;">Free key at <strong>aistudio.google.com</strong> → Get API Key. Stored locally only.</p>
+          <div class="input-group">
+            <input type="password" id="config-gemini-key-input" placeholder="AIza…">
+            <button class="btn btn-primary" onclick="saveConfigGeminiKey(this)">Save Key</button>
+          </div>
+          <div id="config-gemini-key-status" class="text-muted mt-2" style="font-size:0.78rem;min-height:1.2em;"></div>
+        </div>
+        <div>
+          <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Model <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.78rem;">— switch if you hit a quota limit</span></div>
+          <div id="config-gemini-model-btns" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
+          <div id="config-gemini-model-status" class="text-muted" style="font-size:0.78rem;margin-top:8px;min-height:1.2em;"></div>
+        </div>
+      </div>
     </div>
 
     <div class="card" style="margin-bottom:18px;">
@@ -1394,11 +1462,6 @@ FOOTER: Thanks for reading.</pre>
 
 </main>
 
-<!-- Theme picker popup (Blog Editor) -->
-<div id="theme-popup" class="theme-popup">
-  <div class="theme-popup-title">Choose Theme</div>
-  <div id="theme-popup-row" class="theme-row"></div>
-</div>
 
 <script>
 // ═══════════════════════════════════════════
@@ -1410,6 +1473,7 @@ let blogId = null;
 let nextPageToken = null;
 let activePostId = null;
 let _isNewPost = false;
+let _isDraft = false;
 let activeYear = '';
 let activeBlogSearch = '';
 let _liveHtml = '';
@@ -1427,7 +1491,7 @@ function switchTab(name) {
   const idx = btnMap[name];
   if (idx !== undefined) document.querySelectorAll('.tab-btn')[idx].classList.add('active');
   if (name === 'feed') initFeed();
-  if (name === 'config') initSkills();
+  if (name === 'config') { initSkills(); initConfigConnection(); checkGeminiStatus(); }
 }
 
 function toggleUtilDropdown(e) {
@@ -1570,34 +1634,43 @@ async function checkGeminiStatus() {
 }
 
 function buildModelPicker(models, activeId) {
-  const wrap = document.getElementById('gemini-model-btns');
-  wrap.innerHTML = '';
-  models.forEach(m => {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-outline btn-sm' + (m.id === activeId ? ' active' : '');
-    btn.style.cssText = m.id === activeId
-      ? 'border-color:var(--accent);background:var(--warm);color:var(--primary);'
-      : '';
-    btn.textContent = m.label;
-    btn.dataset.id = m.id;
-    btn.onclick = () => selectGeminiModel(m.id, m.label);
-    wrap.appendChild(btn);
+  ['gemini-model-btns', 'config-gemini-model-btns'].forEach(containerId => {
+    const wrap = document.getElementById(containerId);
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    models.forEach(m => {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-outline btn-sm' + (m.id === activeId ? ' active' : '');
+      btn.style.cssText = m.id === activeId
+        ? 'border-color:var(--accent);background:var(--warm);color:var(--primary);'
+        : '';
+      btn.textContent = m.label;
+      btn.dataset.id = m.id;
+      btn.onclick = () => selectGeminiModel(m.id, m.label);
+      wrap.appendChild(btn);
+    });
   });
 }
 
 async function selectGeminiModel(id, label) {
-  const statusEl = document.getElementById('gemini-model-status');
-  statusEl.textContent = 'Saving…';
+  ['gemini-model-status', 'config-gemini-model-status'].forEach(sid => {
+    const el = document.getElementById(sid);
+    if (el) el.textContent = 'Saving…';
+  });
   const data = await post('/api/save-gemini-model', {model: id});
-  if (data.error) { statusEl.textContent = 'Error: ' + data.error; return; }
-  geminiModel = id;
-  buildModelPicker(
-    Array.from(document.getElementById('gemini-model-btns').querySelectorAll('button'))
-      .map(b => ({id: b.dataset.id, label: b.textContent})),
-    id
-  );
-  statusEl.textContent = '✓ Model set to ' + label;
-  setTimeout(() => { statusEl.textContent = ''; }, 2000);
+  const msg = data.error ? 'Error: ' + data.error : '✓ Model set to ' + label;
+  if (!data.error) {
+    geminiModel = id;
+    buildModelPicker(
+      Array.from(document.getElementById('gemini-model-btns').querySelectorAll('button'))
+        .map(b => ({id: b.dataset.id, label: b.textContent})),
+      id
+    );
+  }
+  ['gemini-model-status', 'config-gemini-model-status'].forEach(sid => {
+    const el = document.getElementById(sid);
+    if (el) { el.textContent = msg; setTimeout(() => { el.textContent = ''; }, 2000); }
+  });
 }
 
 function updateSmartBtnStyle() {
@@ -1627,6 +1700,22 @@ async function saveGeminiKey(btn) {
     document.getElementById('gemini-key-status').textContent = '✓ Key saved';
     document.getElementById('gemini-key-input').value = '';
     setTimeout(() => document.getElementById('gemini-setup').classList.add('hidden'), 1200);
+    toast('Gemini API key saved!', 'success');
+  } finally {
+    setBtnLoading(btn, false);
+  }
+}
+
+async function saveConfigGeminiKey(btn) {
+  const key = document.getElementById('config-gemini-key-input').value.trim();
+  if (!key) { toast('Paste your API key first', 'error'); return; }
+  setBtnLoading(btn, true);
+  try {
+    await post('/api/save-gemini-key', {key});
+    geminiConfigured = true;
+    updateSmartBtnStyle();
+    document.getElementById('config-gemini-key-status').textContent = '✓ Key saved';
+    document.getElementById('config-gemini-key-input').value = '';
     toast('Gemini API key saved!', 'success');
   } finally {
     setBtnLoading(btn, false);
@@ -1710,6 +1799,18 @@ async function loadBlogConfig() {
   if (!_configBlogUrl) return;
   const status = await get('/blogger/status');
   if (status.connected) await loadBlog();
+}
+
+// ═══════════════════════════════════════════
+//  CONFIG — CONNECTION
+// ═══════════════════════════════════════════
+async function initConfigConnection() {
+  const data = await get('/blogger/status');
+  document.getElementById('config-blogger-connected').classList.toggle('hidden', !data.connected);
+  document.getElementById('config-blogger-disconnected').classList.toggle('hidden', data.connected);
+  if (!data.connected && !data.has_credentials) {
+    document.getElementById('config-no-creds-alert').classList.remove('hidden');
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -1828,6 +1929,7 @@ async function disconnectBlogger() {
   document.getElementById('blogger-body').classList.add('hidden');
   document.getElementById('blog-info').classList.add('hidden');
   checkBloggerStatus();
+  initConfigConnection();
 }
 
 async function loadBlog() {
@@ -1954,6 +2056,7 @@ async function loadPost(postId, el) {
   el.classList.add('selected');
   activePostId = postId;
   _isNewPost = false;
+  _isDraft = false;
   document.getElementById('delete-post-btn').style.display = '';
   switchPostView('html');
   document.getElementById('editor-empty').classList.add('hidden');
@@ -1999,13 +2102,16 @@ function refreshPostPreview() {
     document.getElementById('post-html').value || '';
 }
 
-function openThemePopup(e) {
-  e.stopPropagation();
-  const popup = document.getElementById('theme-popup');
-  const btn   = document.getElementById('theme-popup-btn');
-  const row   = document.getElementById('theme-popup-row');
+function toggleReformatPanel() {
+  const panel = document.getElementById('reformat-panel');
+  const btn   = document.getElementById('reformat-toggle-btn');
+  const isHidden = panel.classList.toggle('hidden');
+  if (btn) btn.classList.toggle('active', !isHidden);
+  if (!isHidden) _populateReformatThemes();
+}
 
-  // Populate theme buttons
+function _populateReformatThemes() {
+  const row = document.getElementById('reformat-theme-row');
   row.innerHTML = '';
   themes.forEach(t => {
     const b = document.createElement('button');
@@ -2013,46 +2119,33 @@ function openThemePopup(e) {
     b.dataset.key = t.key;
     const label = t.name.split(' (')[0];
     b.innerHTML = `<div class="theme-dots"><span style="background:${t.primary}"></span><span style="background:${t.accent}"></span></div>${label}`;
-    b.onclick = () => applyThemeToPost(t.key);
+    b.onclick = () => {
+      activeTheme = t.key;
+      row.querySelectorAll('.theme-btn').forEach(x => x.classList.toggle('active', x.dataset.key === t.key));
+    };
     row.appendChild(b);
   });
-
-  // Position below the button
-  const rect = btn.getBoundingClientRect();
-  popup.style.top  = (rect.bottom + window.scrollY + 6) + 'px';
-  popup.style.left = (rect.left  + window.scrollX) + 'px';
-  popup.classList.toggle('open');
 }
 
-async function applyThemeToPost(themeKey) {
-  document.getElementById('theme-popup').classList.remove('open');
-  activeTheme = themeKey;
-  document.querySelectorAll('.theme-btn').forEach(b =>
-    b.classList.toggle('active', b.dataset.key === themeKey));
-
+async function applyThemeToPost(themeKey, btn) {
   const html = document.getElementById('post-html').value.trim();
   if (!html) return;
-  const btn = document.getElementById('theme-popup-btn');
-  setBtnLoading(btn, true);
+  if (btn) setBtnLoading(btn, true);
   try {
     const data = await post('/api/format', {text: html, theme: themeKey});
     document.getElementById('post-html').value = data.html;
     refreshPostPreview();
     updateVersionBadge();
-    toast('Theme applied: ' + themeKey.replace('_', ' '), 'success');
+    toast('Theme applied: ' + themeKey.replace(/_/g, ' '), 'success');
   } catch(e) {
     toast('Format failed', 'error');
   } finally {
-    setBtnLoading(btn, false);
+    if (btn) setBtnLoading(btn, false);
   }
 }
 
-// Close theme popup on outside click
-document.addEventListener('click', () => {
-  document.getElementById('theme-popup')?.classList.remove('open');
-});
-
-async function reformatAndExtract(btn) {
+async function runAiReformat(btn) {
+  if (!confirm('AI reformat will replace the current post HTML with a newly formatted version. Continue?')) return;
   const rawHtml = document.getElementById('post-html').value.trim();
   if (!rawHtml) return;
 
@@ -2073,10 +2166,7 @@ async function reformatAndExtract(btn) {
     const cleanData = await post('/api/clean', {html: rawHtml});
 
     // Step 3: combine — formatted HTML then extracted image block at the end
-    let combined = formattedHtml;
-    if (cleanData.count > 0) {
-      combined += '\n\n<!-- Extracted Images -->\n' + cleanData.html;
-    }
+    const combined = _placeImages(formattedHtml, cleanData.tags || []);
 
     // Update post HTML editor
     document.getElementById('post-html').value = combined;
@@ -2112,9 +2202,15 @@ async function reformatAndExtract(btn) {
   }
 }
 
-function newPost() {
-  activePostId = null;
-  _isNewPost = true;
+async function newPost() {
+  if (!blogId) { toast('Set your blog URL in Config first', 'error'); return; }
+  // Create blank draft on Blogger immediately so it appears in the sidebar
+  const data = await fetchJson(`/blogger/post?blog_id=${blogId}`, 'POST', {title: 'Untitled', content: '', draft: true});
+  if (!data.success) { toast('Could not create draft: ' + (data.error || 'unknown'), 'error'); return; }
+
+  activePostId = data.id;
+  _isNewPost = false;
+  _isDraft = true;
   _liveHtml = '';
   _activeVersionTs = 'live';
   document.getElementById('editor-empty').classList.add('hidden');
@@ -2122,14 +2218,19 @@ function newPost() {
   document.getElementById('post-images-card').classList.add('hidden');
   document.getElementById('versions-panel').classList.add('hidden');
   document.getElementById('version-status-badge').style.display = 'none';
-  document.getElementById('delete-post-btn').style.display = 'none';
+  document.getElementById('delete-post-btn').style.display = '';
   const titleEl = document.getElementById('post-editor-title');
   titleEl.textContent = '';
   titleEl.dataset.labels = '[]';
   document.getElementById('post-labels-row').classList.add('hidden');
-  document.getElementById('post-view-link').href = '#';
+  document.getElementById('post-view-link').href = data.url || '#';
   document.getElementById('post-html').value = '';
   switchPostView('compose');
+  await loadPosts();
+  // Highlight the new post in the sidebar
+  document.querySelectorAll('.post-item').forEach(i => {
+    i.classList.toggle('selected', i.dataset.id === data.id);
+  });
 }
 
 function switchPostView(mode) {
@@ -2172,6 +2273,7 @@ function switchPostView(mode) {
 }
 
 async function blogWrite(btn) {
+  if (!confirm('Send post content to Gemini and rewrite it in the blog voice? This will replace the current content.')) return;
   // sync compose → textarea if in compose view
   if (!document.getElementById('post-compose-card').classList.contains('hidden')) {
     const frame = document.getElementById('post-compose-frame');
@@ -2204,6 +2306,7 @@ async function deletePost(btn) {
     if (data.success) {
       toast('Post deleted.', 'success');
       activePostId = null;
+      _isDraft = false;
       document.getElementById('post-editor').classList.add('hidden');
       document.getElementById('editor-empty').classList.remove('hidden');
       await loadPosts();
@@ -2228,25 +2331,31 @@ async function savePost(btn) {
   const content = document.getElementById('post-html').value;
   const labels = JSON.parse(titleEl.dataset.labels || '[]');
 
-  if (_isNewPost) {
+  if (!activePostId) return;
+
+  if (_isDraft) {
     if (!confirm(`Publish "${title}" to Blogger?`)) return;
     setBtnLoading(btn, true);
     try {
-      const data = await fetchJson(`/blogger/post?blog_id=${blogId}`, 'POST', {title, content, labels, draft: false});
-      if (data.success) {
+      // Update content first, then publish
+      const upd = await fetchJson(`/blogger/post/${activePostId}?blog_id=${blogId}`, 'PUT', {title, content, labels});
+      if (upd.error) { toast('Error: ' + upd.error, 'error'); return; }
+      const pub = await fetchJson(`/blogger/post/${activePostId}/publish?blog_id=${blogId}`, 'POST', {});
+      if (pub.success) {
         toast('Post published!', 'success');
-        _isNewPost = false;
-        activePostId = data.id;
-        document.getElementById('post-view-link').href = data.url || '#';
+        _isDraft = false;
+        document.getElementById('post-view-link').href = pub.url || upd.url || '#';
         await loadPosts();
+        document.querySelectorAll('.post-item').forEach(i => {
+          i.classList.toggle('selected', i.dataset.id === activePostId);
+        });
       } else {
-        toast('Error: ' + (data.error || 'unknown'), 'error');
+        toast('Error publishing: ' + (pub.error || 'unknown'), 'error');
       }
     } finally {
       setBtnLoading(btn, false);
     }
   } else {
-    if (!activePostId) return;
     if (!confirm(`Save changes to "${title}" on Blogger?`)) return;
     setBtnLoading(btn, true);
     try {
@@ -2262,6 +2371,22 @@ async function savePost(btn) {
 // ═══════════════════════════════════════════
 //  HELPERS
 // ═══════════════════════════════════════════
+function _placeImages(html, tags) {
+  if (!tags || tags.length === 0) return html;
+  if (tags.length === 1) return html + '\n' + tags[0];
+  const firstImg = tags[0];
+  const rest = tags.slice(1);
+  const marker = '</section>';
+  const idx = html.indexOf(marker);
+  if (idx !== -1) {
+    const pos = idx + marker.length;
+    html = html.slice(0, pos) + '\n' + firstImg + html.slice(pos);
+  } else {
+    html = firstImg + '\n' + html;
+  }
+  return html + '\n' + rest.join('\n');
+}
+
 function renderImgGrid(gridId, tags) {
   const grid = document.getElementById(gridId);
   grid.innerHTML = '';

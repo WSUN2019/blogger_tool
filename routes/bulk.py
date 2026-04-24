@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from config import login_required
 from blogformat import THEMES, parse_input, render as render_post
 from blogger_client import _get_service
-from html_utils import _html_to_plain, _auto_inject_title
+from html_utils import _html_to_plain, _auto_inject_title, _place_images
 from gemini_client import _get_reformat_prompt, _get_gemini_key, _get_gemini_model
 from img_cleaner import clean_html_string as extract_img_tags
 
@@ -57,8 +57,7 @@ def blogger_bulk_reformat_one():
         formatted_html = render_post(post_obj, theme)
 
         img_tags = extract_img_tags(original_html)
-        if img_tags:
-            formatted_html += '\n' + '\n'.join(img_tags)
+        formatted_html = _place_images(formatted_html, img_tags)
 
         body = {'id': post_id, 'title': p['title'], 'content': formatted_html}
         if 'labels' in p:

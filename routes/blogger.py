@@ -172,6 +172,20 @@ def blogger_update_post(post_id):
         return jsonify({'error': str(e)}), 400
 
 
+@blogger_bp.route('/blogger/post/<post_id>/publish', methods=['POST'])
+@login_required
+def blogger_publish_post(post_id):
+    svc = _get_service()
+    if not svc:
+        return jsonify({'error': 'Not authenticated'}), 401
+    blog_id = request.args.get('blog_id', '')
+    try:
+        r = svc.posts().publish(blogId=blog_id, postId=post_id).execute()
+        return jsonify({'success': True, 'url': r.get('url', '')})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
 @blogger_bp.route('/blogger/post/<post_id>', methods=['DELETE'])
 @login_required
 def blogger_delete_post(post_id):
